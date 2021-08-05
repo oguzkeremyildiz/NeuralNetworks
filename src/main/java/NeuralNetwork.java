@@ -179,7 +179,9 @@ public class NeuralNetwork implements Serializable {
         }
         deltaWeights.addFirst(matrix);
         deltaWeights.set(0, multiplyMatrices(deltaWeights.getFirst(), layers[layers.length - 2].neuronsToMatrix()));
-        deltaWeights.addFirst(matrix);
+        if (layers.length > 2) {
+            deltaWeights.addFirst(matrix);
+        }
     }
 
     private void backpropagation(int classInfo, double learningRate) {
