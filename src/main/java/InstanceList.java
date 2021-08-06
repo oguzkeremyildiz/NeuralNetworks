@@ -3,13 +3,15 @@ import java.util.*;
 
 public class InstanceList implements Serializable {
 
-    private ArrayList<Instance> list;
-    private HashMap<String, Integer> classes;
+    private final ArrayList<Instance> list;
+    private final HashMap<String, Integer> classes;
+    private final HashMap<Integer, String> reverseClasses;
     private int input = -1;
 
     public InstanceList(Scanner source, String regex) throws InputSizeException {
         this.list = new ArrayList<>();
         this.classes = new HashMap<>();
+        this.reverseClasses = new HashMap<>();
         int currentKey = -1;
         while (source.hasNext()) {
             String[] line = source.nextLine().split(regex);
@@ -24,6 +26,9 @@ public class InstanceList implements Serializable {
             if (!classes.containsKey(classInfo)) {
                 currentKey++;
                 classes.put(classInfo, currentKey);
+            }
+            if (!reverseClasses.containsKey(currentKey)) {
+                reverseClasses.put(currentKey, classInfo);
             }
             list.add(new Instance());
             for (String s : line) {
@@ -60,11 +65,6 @@ public class InstanceList implements Serializable {
     }
 
     public String get(int neuron) {
-        for (String key : classes.keySet()) {
-            if (classes.get(key) == neuron) {
-                return key;
-            }
-        }
-        return null;
+        return reverseClasses.get(neuron);
     }
 }
