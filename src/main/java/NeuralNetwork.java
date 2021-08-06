@@ -1,7 +1,4 @@
-import ActivationFunctions.Activation;
-import ActivationFunctions.ActivationFunction;
-import ActivationFunctions.ReLU;
-import ActivationFunctions.Sigmoid;
+import ActivationFunctions.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +49,9 @@ public class NeuralNetwork implements Serializable {
             case "RELU":
                 this.function = new ReLU();
                 break;
+            case "TANH":
+                this.function = new TanH();
+                break;
             default:
                 this.function = null;
                 break;
@@ -66,6 +66,9 @@ public class NeuralNetwork implements Serializable {
                 break;
             case RELU:
                 function = new ReLU();
+                break;
+            case TANH:
+                function = new TanH();
                 break;
             default:
                 function = null;

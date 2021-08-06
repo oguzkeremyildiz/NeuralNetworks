@@ -12,14 +12,14 @@ public class NeuralNetworkTest {
 
     @Test
     public void testTrain() throws InputSizeException, FileNotFoundException {
-        InstanceList list = new InstanceList(new Scanner(new File("Dataset/dermatology.txt")), ",");
+        InstanceList list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/dermatology.txt")), ",");
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
         hiddenLayers.add(20);
         NeuralNetwork net = new NeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
         net.train(1000, 0.01, 0.99);
         double accuracy = net.test(list);
         assertEquals(99.72677595628416, accuracy, 0.01);
-        list = new InstanceList(new Scanner(new File("Dataset/bupa.txt")), ",");
+        list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/bupa.txt")), ",");
         hiddenLayers = new LinkedList<>();
         hiddenLayers.add(15);
         hiddenLayers.add(15);
@@ -27,7 +27,7 @@ public class NeuralNetworkTest {
         net.train(100, 0.01, 0.99);
         accuracy = net.test(list);
         assertEquals(73.91304347826087, accuracy, 0.01);
-        list = new InstanceList(new Scanner(new File("Dataset/iris.txt")), ",");
+        list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/iris.txt")), ",");
         hiddenLayers = new LinkedList<>();
         hiddenLayers.add(5);
         hiddenLayers.add(5);
