@@ -1,5 +1,5 @@
 package ActivationFunctions;
 
 public enum Activation {
-    SIGMOID, RELU, TANH
+    SIGMOID, RELU, TANH, LINEAR
 }

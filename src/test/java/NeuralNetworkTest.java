@@ -16,7 +16,7 @@ public class NeuralNetworkTest {
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
         hiddenLayers.add(20);
         NeuralNetwork net = new NeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
-        net.train(1000, 0.01, 0.99);
+        net.train(1000, 0.01, 0.99, 0.5);
         double accuracy = net.test(list);
         assertEquals(99.72677595628416, accuracy, 0.01);
         list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/bupa.txt")), ",");
@@ -24,7 +24,7 @@ public class NeuralNetworkTest {
         hiddenLayers.add(15);
         hiddenLayers.add(15);
         net = new NeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
-        net.train(100, 0.01, 0.99);
+        net.train(100, 0.01, 0.99, 0.0);
         accuracy = net.test(list);
         assertEquals(73.91304347826087, accuracy, 0.01);
         list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/iris.txt")), ",");
@@ -32,9 +32,9 @@ public class NeuralNetworkTest {
         hiddenLayers.add(5);
         hiddenLayers.add(5);
         net = new NeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
-        net.train(500, 0.1, 0.99);
+        net.train(500, 0.1, 0.99, 0.3);
         accuracy = net.test(list);
-        assertEquals(98.66666666666667, accuracy, 0.01);
+        assertEquals(99.33333333333333, accuracy, 0.01);
     }
 
 }

@@ -53,7 +53,7 @@ public class NeuralNetwork implements Serializable {
                 this.function = new TanH();
                 break;
             default:
-                this.function = null;
+                this.function = new Linear();
                 break;
         }
     }
@@ -71,7 +71,7 @@ public class NeuralNetwork implements Serializable {
                 function = new TanH();
                 break;
             default:
-                function = null;
+                function = new Linear();
                 break;
         }
         this.function = function;
@@ -152,11 +152,14 @@ public class NeuralNetwork implements Serializable {
         return matrix;
     }
 
-    private void setWeights(LinkedList<double[][]> deltaWeights) {
+    private void setWeights(LinkedList<double[][]> deltaWeights, LinkedList<double[][]> oldDeltaWeights, double momentum) {
         for (int t = 0; t < deltaWeights.size(); t++) {
             double[][] weights = deltaWeights.get(t);
             for (int i = 0; i < weights.length; i++) {
                 for (int j = 0; j < weights[i].length; j++) {
+                    if (!oldDeltaWeights.isEmpty()) {
+                        weights[i][j] += (momentum * oldDeltaWeights.get(t)[i][j]);
+                    }
                     if (j > 0) {
                         layers[t].getNeuron(j - 1).addWeight(i, weights[i][j]);
                     } else {
@@ -187,7 +190,7 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    private void backpropagation(int classInfo, double learningRate) {
+    private LinkedList<double[][]> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<double[][]> oldDeltaWeights) {
         LinkedList<double[][]> deltaWeights = new LinkedList<>();
         calculateRMinusY(deltaWeights, classInfo, learningRate);
         for (int i = layers.length - 3; i > -1; i--) {
@@ -197,16 +200,18 @@ public class NeuralNetwork implements Serializable {
                 deltaWeights.addFirst(currentError);
             }
         }
-        setWeights(deltaWeights);
+        setWeights(deltaWeights, oldDeltaWeights, momentum);
+        return deltaWeights;
     }
 
-    public void train(int epoch, double learningRate, double etaDecrease) {
+    public void train(int epoch, double learningRate, double etaDecrease, double momentum) {
+        LinkedList<double[][]> oldDeltaWeights = new LinkedList<>();
         for (int i = 0; i < epoch; i++) {
             instanceList.shuffle(seed);
             for (int j = 0; j < instanceList.size(); j++) {
                 createInputVector(instanceList.getInstance(j));
                 feedForward();
-                backpropagation(instanceList.get(instanceList.getInstance(j).getLast()), learningRate);
+                oldDeltaWeights = backpropagation(instanceList.get(instanceList.getInstance(j).getLast()), learningRate, momentum, oldDeltaWeights);
             }
             learningRate *= etaDecrease;
         }
@@ -217,7 +222,7 @@ public class NeuralNetwork implements Serializable {
         feedForward();
         if (instanceList.getOutput() == 1) {
             double outputValue = layers[layers.length - 1].getNeuron(0).getValue();
-            if (outputValue > 0.5) {
+            if (outputValue >= 0.5) {
                 return instanceList.get(1);
             }
             return instanceList.get(0);
