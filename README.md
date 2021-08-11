@@ -1,3 +1,8 @@
+For Developers
+============
+
+You can also see [C++](https://github.com/oguzkeremyildiz/NeuralNetworks_CPP) repository.
+
 ## Requirements
 
 * [Java Development Kit 8 or higher](#java), Open JDK or Oracle JDK
