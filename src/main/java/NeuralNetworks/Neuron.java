@@ -1,3 +1,5 @@
+package NeuralNetworks;
+
 import java.io.Serializable;
 
 public class Neuron implements Serializable {

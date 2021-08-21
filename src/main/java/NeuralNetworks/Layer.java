@@ -1,5 +1,8 @@
+package NeuralNetworks;
+
 import java.io.Serializable;
 import java.util.Random;
+import Math.*;
 
 public class Layer implements Serializable {
 
@@ -45,28 +48,28 @@ public class Layer implements Serializable {
         }
     }
 
-    public double[][] neuronsToMatrix() {
-        double[][] neurons = new double[1][this.neurons.length + 1];
-        neurons[0][0] = 1.0;
+    public Matrix neuronsToMatrix() {
+        Matrix neurons = new Matrix(1, this.neurons.length + 1);
+        neurons.setValue(0, 0, 1.0);
         for (int i = 0; i < this.neurons.length; i++) {
-            neurons[0][i + 1] = this.neurons[i].getValue();
+            neurons.setValue(0, i + 1, this.neurons[i].getValue());
         }
         return neurons;
     }
 
-    public double[] neuronsToVector() {
-        double[] neurons = new double[this.neurons.length];
+    public Vector neuronsToVector() {
+        Vector neurons = new Vector(this.neurons.length, 0);
         for (int i = 0; i < this.neurons.length; i++) {
-            neurons[i] = this.neurons[i].getValue();
+            neurons.setValue(i, this.neurons[i].getValue());
         }
         return neurons;
     }
 
-    public double[][] weightsToMatrix() {
-        double[][] weights = new double[size][nextSize];
+    public Matrix weightsToMatrix() {
+        Matrix weights = new Matrix(size, nextSize);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
-                weights[i][j] = neurons[i].getWeight(j);
+                weights.setValue(i, j, neurons[i].getWeight(j));
             }
         }
         return weights;

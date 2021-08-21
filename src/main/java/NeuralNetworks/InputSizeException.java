@@ -1,3 +1,5 @@
+package NeuralNetworks;
+
 public class InputSizeException extends Exception {
 
     public InputSizeException() {}

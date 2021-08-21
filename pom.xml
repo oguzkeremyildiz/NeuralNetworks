@@ -27,6 +27,11 @@
             <artifactId>Util</artifactId>
             <version>1.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.starlangsoftware</groupId>
+            <artifactId>WordToVec</artifactId>
+            <version>1.0.3</version>
+        </dependency>
     </dependencies>
 
     <name>NeuralNetworks</name>

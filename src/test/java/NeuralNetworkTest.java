@@ -1,17 +1,21 @@
-import ActivationFunctions.Activation;
+import NeuralNetworks.ActivationFunctions.Activation;
+import NeuralNetworks.InputSizeException;
+import NeuralNetworks.InstanceList.InstanceList;
+import NeuralNetworks.Nets.NeuralNetwork;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.Scanner;
+import Math.*;
 
 import static org.junit.Assert.*;
 
 public class NeuralNetworkTest {
 
     @Test
-    public void testTrain() throws InputSizeException, FileNotFoundException {
+    public void testTrain() throws InputSizeException, FileNotFoundException, MatrixDimensionMismatch, MatrixRowColumnMismatch {
         InstanceList list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/dermatology.txt")), ",");
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
         hiddenLayers.add(20);

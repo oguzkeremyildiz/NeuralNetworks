@@ -1,4 +1,4 @@
-package ActivationFunctions;
+package NeuralNetworks.ActivationFunctions;
 
 public enum Activation {
     SIGMOID, RELU, TANH, LINEAR

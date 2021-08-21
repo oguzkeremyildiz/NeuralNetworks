@@ -1,6 +1,7 @@
-package ActivationFunctions;
+package NeuralNetworks.ActivationFunctions;
 
 import java.io.Serializable;
+import Math.*;
 
 public class TanH implements ActivationFunction, Serializable {
     @Override
@@ -9,12 +10,12 @@ public class TanH implements ActivationFunction, Serializable {
     }
 
     @Override
-    public double[][] calculateBack(double[] values) {
-        double[][] vector = new double[values.length][1];
-        for (int i = 0; i < values.length; i++) {
-            vector[i][0] = 1.0 - (values[i] * values[i]);
+    public Matrix calculateBack(Vector values) {
+        Matrix matrix = new Matrix(values.size(), 1);
+        for (int i = 0; i < values.size(); i++) {
+            matrix.setValue(i, 0, 1.0 - (values.getValue(i) * values.getValue(i)));
         }
-        return vector;
+        return matrix;
     }
 
     @Override
