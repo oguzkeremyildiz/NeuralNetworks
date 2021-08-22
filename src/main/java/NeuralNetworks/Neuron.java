@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Neuron implements Serializable {
 
-    private double value;
+    protected double value;
     private double[] weights;
 
     public Neuron() {
@@ -21,10 +21,6 @@ public class Neuron implements Serializable {
         return weights[i];
     }
 
-    public void setWeight(int i, double weight) {
-        weights[i] = weight;
-    }
-
     public void addWeight(int i, double weight) {
         weights[i] += weight;
     }
@@ -35,10 +31,6 @@ public class Neuron implements Serializable {
 
     public void setValue(double value) {
         this.value = value;
-    }
-
-    public void initializeWeight(int size) {
-        weights = new double[size];
     }
 
     @Override

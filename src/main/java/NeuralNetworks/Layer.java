@@ -6,9 +6,9 @@ import Math.*;
 
 public class Layer implements Serializable {
 
-    private final Neuron[] neurons;
-    private final int size;
-    private final int nextSize;
+    protected Neuron[] neurons;
+    protected int size;
+    protected int nextSize;
 
     public Layer(int size, int nextSize, int seed) {
         this.size = size;
@@ -31,6 +31,9 @@ public class Layer implements Serializable {
         for (int i = 0; i < neurons.length; i++) {
             neurons[i] = new Neuron();
         }
+    }
+
+    public Layer() {
     }
 
     public Neuron getNeuron(int i) {

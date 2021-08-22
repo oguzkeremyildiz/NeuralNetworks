@@ -1,7 +1,6 @@
 package NeuralNetworks.Nets;
 
 import NeuralNetworks.ActivationFunctions.*;
-import NeuralNetworks.Instance;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import Math.*;
 
-public abstract class Net<T> implements Serializable {
+public abstract class Net implements Serializable {
 
     protected final int seed;
     protected final ActivationFunction function;
@@ -37,8 +36,6 @@ public abstract class Net<T> implements Serializable {
     protected abstract void feedForward();
 
     public abstract void train(int epoch, double learningRate, double etaDecrease, double momentum) throws MatrixRowColumnMismatch, MatrixDimensionMismatch;
-
-    public abstract String predict(Instance<T> instance);
 
     public void save(String fileName) {
         try {

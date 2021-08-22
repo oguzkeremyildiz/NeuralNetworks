@@ -29,4 +29,8 @@ public class Instance<T> implements Serializable {
     public T getLast() {
         return list.get(list.size() - 1);
     }
+
+    public int size() {
+        return list.size();
+    }
 }

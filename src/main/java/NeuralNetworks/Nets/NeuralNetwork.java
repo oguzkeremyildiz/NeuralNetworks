@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.LinkedList;
 import Math.*;
 
-public class NeuralNetwork extends Net<String> implements Serializable {
+public class NeuralNetwork extends Net implements Serializable {
 
     private final Layer[] layers;
     private final InstanceList instanceList;
