@@ -1,18 +1,20 @@
 package NeuralNetworks;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Random;
 
 public class RecurrentNeuron extends Neuron implements Serializable {
 
     private double[] recurrentWeights;
     private double oldValue;
 
-    public RecurrentNeuron(double[] weights, int recurrentWeightsSize) {
+    public RecurrentNeuron(double[] weights, int recurrentWeightsSize, Random random) {
         super(weights);
         oldValue = 0.0;
         recurrentWeights = new double[recurrentWeightsSize];
-        Arrays.fill(recurrentWeights, 0.0);
+        for (int i = 0; i < recurrentWeights.length; i++) {
+            recurrentWeights[i] = 2 * random.nextDouble() - 1;
+        }
     }
 
     public double getRecurrentWeight(int i) {

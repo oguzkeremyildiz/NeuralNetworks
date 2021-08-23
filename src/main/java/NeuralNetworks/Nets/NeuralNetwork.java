@@ -104,7 +104,7 @@ public class NeuralNetwork extends Net implements Serializable {
         }
     }
 
-    private LinkedList<Matrix> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<Matrix> oldDeltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
+    protected LinkedList<Matrix> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<Matrix> oldDeltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
         LinkedList<Matrix> deltaWeights = new LinkedList<>();
         calculateRMinusY(deltaWeights, classInfo, learningRate);
         for (int i = layers.length - 3; i > -1; i--) {

@@ -1,6 +1,7 @@
 package NeuralNetworks.InstanceList;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import Dictionary.VectorizedDictionary;
@@ -17,8 +18,11 @@ public class VectorizedInstanceList extends BasicInstanceList<java.util.Vector<S
         return result;
     }
 
+    private final int featureSize;
+
     public VectorizedInstanceList(Scanner source, VectorizedDictionary dictionary, int featureSize, String regex) {
         super();
+        this.featureSize = featureSize;
         int classSize = -1;
         while (source.hasNext()) {
             String[] array = source.nextLine().split(regex);
@@ -45,5 +49,13 @@ public class VectorizedInstanceList extends BasicInstanceList<java.util.Vector<S
                 this.list.get(this.list.size() - 1).add(classVector);
             }
         }
+    }
+
+    public LinkedList<String> collectClassInfos(Instance<java.util.Vector<String>> instance) {
+        LinkedList<String> classes = new LinkedList<>();
+        for (int i = 1; i < instance.size(); i += 2) {
+            classes.add(instance.get(i).get(0));
+        }
+        return classes;
     }
 }

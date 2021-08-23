@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.LinkedList;
+
 import Math.*;
 
 public abstract class Net implements Serializable {
@@ -34,6 +36,8 @@ public abstract class Net implements Serializable {
     }
 
     protected abstract void feedForward();
+
+    protected abstract LinkedList<Matrix> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<Matrix> oldDeltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch;
 
     public abstract void train(int epoch, double learningRate, double etaDecrease, double momentum) throws MatrixRowColumnMismatch, MatrixDimensionMismatch;
 
