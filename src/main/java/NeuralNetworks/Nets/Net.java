@@ -27,6 +27,9 @@ public abstract class Net implements Serializable {
             case TANH:
                 function = new TanH();
                 break;
+            case LEAKYRELU:
+                function = new LeakyReLU();
+                break;
             default:
                 function = new Linear();
                 break;

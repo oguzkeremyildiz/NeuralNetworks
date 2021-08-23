@@ -126,10 +126,14 @@ public class RecurrentNeuralNetwork extends Net implements Serializable {
         int total = 0;
         for (int i = 0; i < list.size(); i++) {
             Instance<java.util.Vector<String>> instance = list.getInstance(i);
-            if (list.collectClassInfos(instance).equals(predict(instance))) {
-                correct++;
+            LinkedList<String> predictedList = predict(instance);
+            LinkedList<String> actualList = list.collectClassInfos(instance);
+            for (int j = 0; j < actualList.size(); j++) {
+                if (actualList.get(j).equals(predictedList.get(j))) {
+                    correct++;
+                }
+                total++;
             }
-            total++;
         }
         return correct * 100.00 / total;
     }

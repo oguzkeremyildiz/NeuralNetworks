@@ -30,6 +30,6 @@ public class RecurrentNeuralNetworkTest {
         RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
         net.train(1000, 0.01, 0.99, 0.5);
         double accuracy = net.test(list);
-        assertEquals(0.0, accuracy, 0.01);
+        assertEquals(33.333333333333336, accuracy, 0.01);
     }
 }
