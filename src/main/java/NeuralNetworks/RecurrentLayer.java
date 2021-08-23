@@ -16,7 +16,7 @@ public class RecurrentLayer extends Layer implements Serializable {
             for (int j = 0; j < weights.length; j++) {
                 weights[j] = 2 * random.nextDouble() - 1;
             }
-            neurons[i] = new RecurrentNeuron(weights, size, random);
+            neurons[i] = new RecurrentNeuron(weights, size, seed);
         }
     }
 

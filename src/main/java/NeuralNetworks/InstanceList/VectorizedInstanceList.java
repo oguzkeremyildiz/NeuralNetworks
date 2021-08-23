@@ -18,11 +18,8 @@ public class VectorizedInstanceList extends BasicInstanceList<java.util.Vector<S
         return result;
     }
 
-    private final int featureSize;
-
     public VectorizedInstanceList(Scanner source, VectorizedDictionary dictionary, int featureSize, String regex) {
         super();
-        this.featureSize = featureSize;
         int classSize = -1;
         while (source.hasNext()) {
             String[] array = source.nextLine().split(regex);
