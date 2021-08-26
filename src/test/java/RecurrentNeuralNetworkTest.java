@@ -18,18 +18,18 @@ import static org.junit.Assert.*;
 public class RecurrentNeuralNetworkTest {
 
     @Test
-    public void testTrain() throws FileNotFoundException, MatrixColumnMismatch, VectorSizeMismatch {
+    public void testTrain() throws FileNotFoundException, MatrixColumnMismatch, VectorSizeMismatch, MatrixRowColumnMismatch, MatrixDimensionMismatch {
         Corpus corpus = new Corpus("test.txt");
         WordToVecParameter parameter = new WordToVecParameter();
         parameter.setCbow(true);
         NeuralNetwork neuralNetwork = new NeuralNetwork(corpus, parameter);
-        VectorizedDictionary dic = neuralNetwork.train();
-        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("data.txt")), dic, 1, " ");
+        VectorizedDictionary dictionary = neuralNetwork.train();
+        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("data.txt")), dictionary, 1, " ");
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
-        hiddenLayers.add(20);
-        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
+        hiddenLayers.add(3);
+        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, list, Activation.RELU);
         net.train(1000, 0.01, 0.99, 0.5);
         double accuracy = net.test(list);
-        assertEquals(33.333333333333336, accuracy, 0.01);
+        assertEquals(100.0, accuracy, 0.01);
     }
 }

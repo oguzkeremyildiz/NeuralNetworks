@@ -1,7 +1,6 @@
 package NeuralNetworks.Nets;
 
 import NeuralNetworks.ActivationFunctions.*;
-import NeuralNetworks.Bias;
 import NeuralNetworks.Instance;
 import NeuralNetworks.InstanceList.InstanceList;
 import NeuralNetworks.Layer;
@@ -10,28 +9,16 @@ import java.io.*;
 import java.util.LinkedList;
 import Math.*;
 
-public class NeuralNetwork extends Net implements Serializable {
-
-    private final Layer[] layers;
-    private final InstanceList instanceList;
-    private final Bias[] biases;
+public class NeuralNetwork extends Net<String> implements Serializable {
 
     public NeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, InstanceList instanceList, Activation activation) {
-        super(seed, activation);
-        this.instanceList = instanceList;
-        hiddenLayers.addFirst(instanceList.getInput());
-        hiddenLayers.addLast(instanceList.getOutput());
-        this.layers = new Layer[hiddenLayers.size()];
+        super(seed, activation, instanceList, hiddenLayers);
         for (int i = 0; i < hiddenLayers.size(); i++) {
             if (i + 1 < hiddenLayers.size()) {
                 this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
             } else {
                 this.layers[i] = new Layer(hiddenLayers.get(i));
             }
-        }
-        biases = new Bias[hiddenLayers.size() - 1];
-        for (int i = 0; i < biases.length; i++) {
-            biases[i] = new Bias(seed, layers[i + 1].size());
         }
     }
 
@@ -60,13 +47,7 @@ public class NeuralNetwork extends Net implements Serializable {
         }
     }
 
-    private Matrix calculateError(int i, LinkedList<Matrix> deltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
-        deltaWeights.set(0, layers[i + 1].weightsToMatrix().multiply(deltaWeights.getFirst()));
-        deltaWeights.set(0, deltaWeights.getFirst().elementProduct(function.calculateBack(layers[i + 1].neuronsToVector())));
-        return deltaWeights.getFirst();
-    }
-
-    private void setWeights(LinkedList<Matrix> deltaWeights, LinkedList<Matrix> oldDeltaWeights, double momentum) {
+    protected void setWeights(LinkedList<Matrix> deltaWeights, LinkedList<Matrix> oldDeltaWeights, double momentum) {
         for (int t = 0; t < deltaWeights.size(); t++) {
             Matrix weights = deltaWeights.get(t);
             for (int i = 0; i < weights.getRow(); i++) {
@@ -81,26 +62,6 @@ public class NeuralNetwork extends Net implements Serializable {
                     }
                 }
             }
-        }
-    }
-
-    private void calculateRMinusY(LinkedList<Matrix> deltaWeights, int classInfo, double learningRate) throws MatrixRowColumnMismatch {
-        Matrix matrix = new Matrix(layers[layers.length - 1].size(), 1);
-        if (matrix.getRow() > 1) {
-            for (int j = 0; j < matrix.getRow(); j++) {
-                if (classInfo == j) {
-                    matrix.setValue(j, 0, learningRate * (1 - layers[layers.length - 1].getNeuron(j).getValue()));
-                } else {
-                    matrix.setValue(j, 0, learningRate * -layers[layers.length - 1].getNeuron(j).getValue());
-                }
-            }
-        } else {
-            matrix.setValue(0, 0, learningRate * (classInfo - layers[layers.length - 1].getNeuron(0).getValue()));
-        }
-        deltaWeights.addFirst(matrix);
-        deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[layers.length - 2].neuronsToMatrix()));
-        if (layers.length > 2) {
-            deltaWeights.addFirst(matrix);
         }
     }
 

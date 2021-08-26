@@ -8,18 +8,10 @@ import java.io.Serializable;
 import java.util.*;
 import Math.*;
 
-public class RecurrentNeuralNetwork extends Net implements Serializable {
-
-    private final Layer[] layers;
-    private final VectorizedInstanceList instanceList;
-    private final Bias[] biases;
+public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implements Serializable {
 
     public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation) {
-        super(seed, activation);
-        this.instanceList = instanceList;
-        hiddenLayers.addFirst(instanceList.getInput());
-        hiddenLayers.addLast(instanceList.getOutput());
-        this.layers = new Layer[hiddenLayers.size()];
+        super(seed, activation, instanceList, hiddenLayers);
         this.layers[0] = new Layer(hiddenLayers.get(0), hiddenLayers.get(1), seed);
         for (int i = 1; i < hiddenLayers.size(); i++) {
             if (i + 1 < hiddenLayers.size()) {
@@ -28,15 +20,23 @@ public class RecurrentNeuralNetwork extends Net implements Serializable {
                 this.layers[i] = new Layer(hiddenLayers.get(i));
             }
         }
-        biases = new Bias[hiddenLayers.size() - 1];
-        for (int i = 0; i < biases.length; i++) {
-            biases[i] = new Bias(seed, layers[i + 1].size());
-        }
     }
 
     private void createInputVector(java.util.Vector<String> inputLayer) {
         for (int i = 0; i < layers[0].size(); i++) {
             layers[0].getNeuron(i).setValue(Double.parseDouble(inputLayer.get(i)));
+        }
+    }
+
+    private void setOldValues() {
+        for (int k = 1; k < layers.length - 1; k++) {
+            ((RecurrentLayer) layers[k]).setValues();
+        }
+    }
+
+    private void setOldValuesToZero() {
+        for (int k = 1; k < layers.length - 1; k++) {
+            ((RecurrentLayer) layers[k]).setValuesToZero();
         }
     }
 
@@ -61,18 +61,67 @@ public class RecurrentNeuralNetwork extends Net implements Serializable {
         if (layers[layers.length - 1].size() > 2) {
             layers[layers.length - 1].softmax();
         }
-        for (int k = 1; k < layers.length - 1; k++) {
-            ((RecurrentLayer) layers[k]).setValues();
+    }
+
+    @Override
+    protected void setWeights(LinkedList<Matrix> deltaWeights, LinkedList<Matrix> oldDeltaWeights, double momentum) {
+        for (int t = 0; t < deltaWeights.size() - 1; t += 2) {
+            Matrix weights = deltaWeights.get(t + 1);
+            Matrix recurrentWeights = deltaWeights.get(t);
+            for (int i = 0; i < weights.getRow(); i++) {
+                for (int j = 0; j < weights.getColumn(); j++) {
+                    if (!oldDeltaWeights.isEmpty()) {
+                        weights.addValue(i, j, momentum * oldDeltaWeights.get(t + 1).getValue(i, j));
+                    }
+                    if (j > 0) {
+                        layers[t / 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
+                    } else {
+                        biases[t / 2].addWeight(i, weights.getValue(i, j));
+                    }
+                }
+            }
+            for (int i = 0; i < recurrentWeights.getRow(); i++) {
+                for (int j = 0; j < recurrentWeights.getColumn(); j++) {
+                    if (!oldDeltaWeights.isEmpty()) {
+                        recurrentWeights.addValue(i, j, momentum * oldDeltaWeights.get(t).getValue(i, j));
+                    }
+                    ((RecurrentNeuron)layers[(t / 2) + 1].getNeuron(j)).addRecurrentWeight(i, recurrentWeights.getValue(i, j));
+                }
+            }
+        }
+        Matrix weights = deltaWeights.getLast();
+        for (int i = 0; i < weights.getRow(); i++) {
+            for (int j = 0; j < weights.getColumn(); j++) {
+                if (!oldDeltaWeights.isEmpty()) {
+                    weights.addValue(i, j, momentum * oldDeltaWeights.getLast().getValue(i, j));
+                }
+                if (j > 0) {
+                    layers[layers.length - 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
+                } else {
+                    biases[layers.length - 2].addWeight(i, weights.getValue(i, j));
+                }
+            }
         }
     }
 
     @Override
-    protected LinkedList<Matrix> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<Matrix> oldDeltaWeights) {
-        return null;
+    protected LinkedList<Matrix> backpropagation(int classInfo, double learningRate, double momentum, LinkedList<Matrix> oldDeltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
+        LinkedList<Matrix> deltaWeights = new LinkedList<>();
+        calculateRMinusY(deltaWeights, classInfo, learningRate);
+        for (int i = layers.length - 3; i > -1; i--) {
+            Matrix currentError = calculateError(i, deltaWeights);
+            deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[i].neuronsToMatrix()));
+            deltaWeights.addFirst(currentError.multiply(((RecurrentLayer)layers[i + 1]).oldNeuronsToMatrix()));
+            if (i > 0) {
+                deltaWeights.addFirst(currentError);
+            }
+        }
+        setWeights(deltaWeights, oldDeltaWeights, momentum);
+        return deltaWeights;
     }
 
     @Override
-    public void train(int epoch, double learningRate, double etaDecrease, double momentum) {
+    public void train(int epoch, double learningRate, double etaDecrease, double momentum) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
         LinkedList<Matrix> oldDeltaWeights = new LinkedList<>();
         for (int i = 0; i < epoch; i++) {
             instanceList.shuffle(seed);
@@ -83,19 +132,16 @@ public class RecurrentNeuralNetwork extends Net implements Serializable {
                     String classInfo = instance.get(k + 1).get(0);
                     feedForward();
                     oldDeltaWeights = backpropagation(instanceList.get(classInfo), learningRate, momentum, oldDeltaWeights);
+                    setOldValues();
                 }
-                for (int k = 1; k < layers.length - 1; k++) {
-                    ((RecurrentLayer) layers[k]).setValuesToZero();
-                }
+                setOldValuesToZero();
             }
             learningRate *= etaDecrease;
         }
     }
 
     public LinkedList<String> predict(Instance<java.util.Vector<String>> instance) {
-        for (int k = 1; k < layers.length - 1; k++) {
-            ((RecurrentLayer) layers[k]).setValuesToZero();
-        }
+        setOldValuesToZero();
         LinkedList<String> classes = new LinkedList<>();
         for (int i = 0; i < instance.size(); i += 2) {
             createInputVector(instance.get(i));
@@ -117,6 +163,7 @@ public class RecurrentNeuralNetwork extends Net implements Serializable {
                 }
                 classes.add(instanceList.get(bestNeuron));
             }
+            setOldValues();
         }
         return classes;
     }
