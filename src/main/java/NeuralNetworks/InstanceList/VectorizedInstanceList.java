@@ -1,10 +1,12 @@
 package NeuralNetworks.InstanceList;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 import Dictionary.VectorizedDictionary;
+import Dictionary.VectorizedWord;
 import Math.Vector;
 import NeuralNetworks.Instance;
 
@@ -20,15 +22,22 @@ public class VectorizedInstanceList extends BasicInstanceList<java.util.Vector<S
 
     public VectorizedInstanceList(Scanner source, VectorizedDictionary dictionary, int featureSize, String regex) {
         super();
+        int layerSize = dictionary.mostSimilarWord(dictionary.getWord(0).toString()).getVector().size();
         int classSize = -1;
         while (source.hasNext()) {
             String[] array = source.nextLine().split(regex);
             this.list.add(new Instance<>());
             for (int i = 0; i < array.length; i += featureSize + 2) {
-                java.util.Vector<String> vec = convert(dictionary.mostSimilarWord(array[i]).getVector());
-                for (int j = i + 1; j < i + featureSize + 1; j++) {
-                    vec.add(array[j]);
+                VectorizedWord vectorizedWord = dictionary.mostSimilarWord(array[i]);
+                java.util.Vector<String> vec = new java.util.Vector<>();
+                if (vectorizedWord != null) {
+                    vec = convert(vectorizedWord.getVector());
+                } else {
+                    for (int j = 0; j < layerSize; j++) {
+                        vec.add("0");
+                    }
                 }
+                vec.addAll(Arrays.asList(array).subList(i + 1, i + featureSize + 1));
                 String classInfo = array[i + featureSize + 1];
                 if (!this.classes.containsKey(classInfo)) {
                     classSize++;

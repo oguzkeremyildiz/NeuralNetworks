@@ -19,14 +19,14 @@ public class RecurrentNeuralNetworkTest {
 
     @Test
     public void testTrain() throws FileNotFoundException, MatrixColumnMismatch, VectorSizeMismatch, MatrixRowColumnMismatch, MatrixDimensionMismatch {
-        NeuralNetwork neuralNetwork = new NeuralNetwork(new Corpus("test.txt"), new WordToVecParameter());
+        NeuralNetwork neuralNetwork = new NeuralNetwork(new Corpus("src/main/resources/Dataset/SentimentAnalysis/dictionary-without-punctuations.txt"), new WordToVecParameter());
         VectorizedDictionary dictionary = neuralNetwork.train();
-        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("data.txt")), dictionary, 1, " ");
+        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("src/main/resources/Dataset/SentimentAnalysis/data-without-punctuations.txt")), dictionary, 0, " ");
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
         hiddenLayers.add(3);
         RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, list, Activation.LEAKYRELU);
-        net.train(1000, 0.01, 0.99, 0.5);
+        net.train(100, 0.01, 0.99, 0.5);
         double accuracy = net.test(list);
-        assertEquals(100.0, accuracy, 0.01);
+        assertEquals(96.78240170729705, accuracy, 0.01);
     }
 }
