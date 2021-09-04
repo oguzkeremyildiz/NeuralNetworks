@@ -2,6 +2,9 @@ package NeuralNetworks.InstanceList;
 
 import NeuralNetworks.Instance;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
@@ -47,5 +50,15 @@ public class BasicInstanceList<T> implements Serializable {
 
     public int size() {
         return list.size();
+    }
+
+    public void save(String fileName) {
+        try {
+            FileOutputStream outFile = new FileOutputStream(fileName);
+            ObjectOutputStream outObject = new ObjectOutputStream(outFile);
+            outObject.writeObject(this);
+        } catch (IOException var5) {
+            var5.printStackTrace();
+        }
     }
 }
