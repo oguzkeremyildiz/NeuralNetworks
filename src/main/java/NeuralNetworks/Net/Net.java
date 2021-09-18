@@ -1,6 +1,6 @@
-package NeuralNetworks.Nets;
+package NeuralNetworks.Net;
 
-import NeuralNetworks.ActivationFunctions.*;
+import NeuralNetworks.ActivationFunction.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,9 +9,11 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 import Math.*;
-import NeuralNetworks.Bias;
+import NeuralNetworks.Layer.LSTMLayer;
+import NeuralNetworks.Layer.RecurrentLayer;
+import NeuralNetworks.Neuron.Bias;
 import NeuralNetworks.InstanceList.BasicInstanceList;
-import NeuralNetworks.Layer;
+import NeuralNetworks.Layer.Layer;
 
 public abstract class Net<T> implements Serializable {
 
@@ -21,11 +23,44 @@ public abstract class Net<T> implements Serializable {
     protected final Layer[] layers;
     protected final Bias[] biases;
 
-    public Net(int seed, Activation activation, BasicInstanceList<T> instanceList, LinkedList<Integer> hiddenLayers) {
+    public Net(int seed, Activation activation, BasicInstanceList<T> instanceList, LinkedList<Integer> hiddenLayers, NetworkType type) {
         this.instanceList = instanceList;
         hiddenLayers.addFirst(instanceList.getInput());
         hiddenLayers.addLast(instanceList.getOutput());
         this.layers = new Layer[hiddenLayers.size()];
+        switch (type) {
+            case NEURALNETWORK:
+                for (int i = 0; i < hiddenLayers.size(); i++) {
+                    if (i + 1 < hiddenLayers.size()) {
+                        this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
+                    } else {
+                        this.layers[i] = new Layer(hiddenLayers.get(i));
+                    }
+                }
+                break;
+            case RECURRENTNEURALNETWORK:
+                this.layers[0] = new Layer(hiddenLayers.get(0), hiddenLayers.get(1), seed);
+                for (int i = 1; i < hiddenLayers.size(); i++) {
+                    if (i + 1 < hiddenLayers.size()) {
+                        this.layers[i] = new RecurrentLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
+                    } else {
+                        this.layers[i] = new Layer(hiddenLayers.get(i));
+                    }
+                }
+                break;
+            case LSTM:
+                this.layers[0] = new LSTMLayer(hiddenLayers.get(0), hiddenLayers.get(1), seed, false);
+                for (int i = 1; i < hiddenLayers.size(); i++) {
+                    if (i + 1 < hiddenLayers.size()) {
+                        this.layers[i] = new LSTMLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed, true);
+                    } else {
+                        this.layers[i] = new Layer(hiddenLayers.get(i));
+                    }
+                }
+                break;
+            default:
+                break;
+        }
         ActivationFunction function;
         switch (activation) {
             case SIGMOID:

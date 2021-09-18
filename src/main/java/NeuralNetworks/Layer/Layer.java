@@ -1,8 +1,9 @@
-package NeuralNetworks;
+package NeuralNetworks.Layer;
 
 import java.io.Serializable;
 import java.util.Random;
 import Math.*;
+import NeuralNetworks.Neuron.Neuron;
 
 public class Layer implements Serializable {
 

@@ -1,9 +1,8 @@
-package NeuralNetworks.Nets;
+package NeuralNetworks.Net;
 
-import NeuralNetworks.ActivationFunctions.*;
-import NeuralNetworks.Instance;
+import NeuralNetworks.ActivationFunction.*;
+import NeuralNetworks.InstanceList.Instance;
 import NeuralNetworks.InstanceList.InstanceList;
-import NeuralNetworks.Layer;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -12,14 +11,7 @@ import Math.*;
 public class NeuralNetwork extends Net<String> implements Serializable {
 
     public NeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, InstanceList instanceList, Activation activation) {
-        super(seed, activation, instanceList, hiddenLayers);
-        for (int i = 0; i < hiddenLayers.size(); i++) {
-            if (i + 1 < hiddenLayers.size()) {
-                this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-            } else {
-                this.layers[i] = new Layer(hiddenLayers.get(i));
-            }
-        }
+        super(seed, activation, instanceList, hiddenLayers, NetworkType.NEURALNETWORK);
     }
 
     protected void feedForward() {

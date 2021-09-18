@@ -1,28 +1,28 @@
-package NeuralNetworks.Nets;
+package NeuralNetworks.Net;
 
-import NeuralNetworks.*;
-import NeuralNetworks.ActivationFunctions.Activation;
+import NeuralNetworks.ActivationFunction.Activation;
+import NeuralNetworks.InstanceList.Instance;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.Vector;
+
 import Math.*;
+import NeuralNetworks.Layer.RecurrentLayer;
+import NeuralNetworks.Neuron.RecurrentNeuron;
 
 public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implements Serializable {
 
     public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation) {
-        super(seed, activation, instanceList, hiddenLayers);
-        this.layers[0] = new Layer(hiddenLayers.get(0), hiddenLayers.get(1), seed);
-        for (int i = 1; i < hiddenLayers.size(); i++) {
-            if (i + 1 < hiddenLayers.size()) {
-                this.layers[i] = new RecurrentLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-            } else {
-                this.layers[i] = new Layer(hiddenLayers.get(i));
-            }
-        }
+        super(seed, activation, instanceList, hiddenLayers, NetworkType.RECURRENTNEURALNETWORK);
     }
 
-    private void createInputVector(java.util.Vector<String> inputLayer) {
+    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation, NetworkType type) {
+        super(seed, activation, instanceList, hiddenLayers, type);
+    }
+
+    protected void createInputVector(java.util.Vector<String> inputLayer) {
         for (int i = 0; i < layers[0].size(); i++) {
             layers[0].getNeuron(i).setValue(Double.parseDouble(inputLayer.get(i)));
         }
@@ -126,7 +126,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         for (int i = 0; i < epoch; i++) {
             instanceList.shuffle(seed);
             for (int j = 0; j < instanceList.size(); j++) {
-                Instance<java.util.Vector<String>> instance = instanceList.getInstance(j);
+                Instance<Vector<String>> instance = instanceList.getInstance(j);
                 for (int k = 0; k < instance.size(); k += 2) {
                     createInputVector(instance.get(k));
                     String classInfo = instance.get(k + 1).get(0);

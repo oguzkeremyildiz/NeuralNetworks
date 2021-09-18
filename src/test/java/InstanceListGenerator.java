@@ -1,6 +1,6 @@
 import Corpus.Corpus;
 import Dictionary.VectorizedDictionary;
-import NeuralNetworks.AttributeType;
+import NeuralNetworks.InstanceList.AttributeType;
 import NeuralNetworks.InputSizeException;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 import WordToVec.NeuralNetwork;
@@ -15,45 +15,23 @@ import Math.*;
 public class InstanceListGenerator {
 
     public static void main(String[] args) throws FileNotFoundException, MatrixColumnMismatch, VectorSizeMismatch, InputSizeException {
-        NeuralNetwork neuralNetwork = new NeuralNetwork(new Corpus("src/main/resources/Dataset/NER/dictionary.txt"), new WordToVecParameter());
+        NeuralNetwork neuralNetwork = new NeuralNetwork(new Corpus("src/main/resources/Dataset/SentimentAnalysis/dictionary.txt"), new WordToVecParameter());
         VectorizedDictionary dictionary = neuralNetwork.train();
         LinkedList<AttributeType> attributeTypes = new LinkedList<>();
         attributeTypes.add(AttributeType.DISCRETE);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        attributeTypes.add(AttributeType.CONTINUOUS);
-        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("src/main/resources/Dataset/SentimentAnalysis/data-w-f-p-train.txt")), dictionary, attributeTypes, " ");
-        list.save("src/main/resources/Dataset/SentimentAnalysis/sentiment-list-2-train.bin");
-        list = new VectorizedInstanceList(new Scanner(new File("src/main/resources/Dataset/SentimentAnalysis/data-w-f-p-test.txt")), dictionary, attributeTypes, " ");
-        list.save("src/main/resources/Dataset/SentimentAnalysis/sentiment-list-2-test.bin");
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        attributeTypes.add(AttributeType.BINARY);
+        VectorizedInstanceList list = new VectorizedInstanceList(new Scanner(new File("src/main/resources/Dataset/ShallowParse/data-w-f-train.txt")), dictionary, attributeTypes, " ");
+        list.save("src/main/resources/Dataset/ShallowParse/shallow-list-1-train.bin");
+        list = new VectorizedInstanceList(new Scanner(new File("src/main/resources/Dataset/ShallowParse/data-w-f-test.txt")), dictionary, attributeTypes, " ");
+        list.save("src/main/resources/Dataset/ShallowParse/shallow-list-1-test.bin");
     }
 }

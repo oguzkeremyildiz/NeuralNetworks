@@ -7,9 +7,7 @@ import java.util.Scanner;
 import Dictionary.VectorizedDictionary;
 import Dictionary.VectorizedWord;
 import Math.Vector;
-import NeuralNetworks.AttributeType;
 import NeuralNetworks.InputSizeException;
-import NeuralNetworks.Instance;
 
 public class VectorizedInstanceList extends BasicInstanceList<java.util.Vector<String>> implements Serializable {
 

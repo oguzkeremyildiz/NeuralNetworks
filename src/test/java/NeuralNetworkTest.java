@@ -1,7 +1,7 @@
-import NeuralNetworks.ActivationFunctions.Activation;
+import NeuralNetworks.ActivationFunction.Activation;
 import NeuralNetworks.InputSizeException;
 import NeuralNetworks.InstanceList.InstanceList;
-import NeuralNetworks.Nets.NeuralNetwork;
+import NeuralNetworks.Net.NeuralNetwork;
 import org.junit.Test;
 
 import java.io.File;

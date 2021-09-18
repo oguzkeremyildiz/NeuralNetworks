@@ -1,4 +1,4 @@
-package NeuralNetworks;
+package NeuralNetworks.Neuron;
 
 import java.io.Serializable;
 import java.util.Random;

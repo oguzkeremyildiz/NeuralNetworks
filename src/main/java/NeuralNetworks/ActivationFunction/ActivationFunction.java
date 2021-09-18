@@ -1,4 +1,4 @@
-package NeuralNetworks.ActivationFunctions;
+package NeuralNetworks.ActivationFunction;
 
 import Math.*;
 public interface ActivationFunction {

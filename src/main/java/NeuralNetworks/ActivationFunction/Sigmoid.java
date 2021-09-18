@@ -1,4 +1,4 @@
-package NeuralNetworks.ActivationFunctions;
+package NeuralNetworks.ActivationFunction;
 
 import java.io.Serializable;
 import Math.*;

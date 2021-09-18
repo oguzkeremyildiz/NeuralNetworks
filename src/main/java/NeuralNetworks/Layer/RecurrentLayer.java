@@ -1,10 +1,15 @@
-package NeuralNetworks;
+package NeuralNetworks.Layer;
 
 import java.io.Serializable;
 import java.util.Random;
 import Math.*;
+import NeuralNetworks.Neuron.Neuron;
+import NeuralNetworks.Neuron.RecurrentNeuron;
 
 public class RecurrentLayer extends Layer implements Serializable {
+
+    public RecurrentLayer() {
+    }
 
     public RecurrentLayer(int size, int nextSize, int seed) {
         super();

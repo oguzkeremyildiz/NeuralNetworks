@@ -1,4 +1,4 @@
-package NeuralNetworks;
+package NeuralNetworks.InstanceList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
