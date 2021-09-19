@@ -31,7 +31,7 @@ public class RecurrentNeuralNetworkTest {
         net.train(100, 0.2, 0.99, 0.0);
         if (testList != null) {
             double accuracy = net.test(testList);
-            assertEquals(54.84165437820378, accuracy, 0.01);
+            assertEquals(53.43725861947897, accuracy, 0.01);
         }
     }
 
@@ -77,7 +77,7 @@ public class RecurrentNeuralNetworkTest {
         net.train(100, 0.01, 0.99, 0.5);
         if (testList != null) {
             double accuracy = net.test(testList);
-            assertEquals(78.0984481426866, accuracy, 0.01);
+            assertEquals(79.25707464363458, accuracy, 0.01);
         }
     }
 }

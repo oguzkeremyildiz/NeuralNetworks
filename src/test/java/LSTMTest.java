@@ -32,7 +32,7 @@ public class LSTMTest {
         net.train(100, 0.2, 0.99, 0.0);
         if (testList != null) {
             double accuracy = net.test(testList);
-            assertEquals(0.0, accuracy, 0.01);
+            assertEquals(17.702408538726214, accuracy, 0.01);
         }
     }
 }
