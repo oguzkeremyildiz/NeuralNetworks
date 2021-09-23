@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class LSTMTest {
 
     @Test
-    public void testShallowParse() throws MatrixDimensionMismatch, MatrixRowColumnMismatch {
+    public void testShallowParse() throws MatrixDimensionMismatch, MatrixRowColumnMismatch, VectorSizeMismatch {
         VectorizedInstanceList trainList = null, testList = null;
         ObjectInputStream outObject;
         try {

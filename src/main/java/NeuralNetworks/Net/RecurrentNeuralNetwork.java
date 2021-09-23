@@ -22,26 +22,26 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         super(seed, activation, instanceList, hiddenLayers, type);
     }
 
-    protected void createInputVector(java.util.Vector<String> inputLayer) {
+    private void createInputVector(java.util.Vector<String> inputLayer) {
         for (int i = 0; i < layers[0].size(); i++) {
             layers[0].getNeuron(i).setValue(Double.parseDouble(inputLayer.get(i)));
         }
     }
 
-    private void setOldValues() {
+    protected void setOldValues() {
         for (int k = 1; k < layers.length - 1; k++) {
             ((RecurrentLayer) layers[k]).setValues();
         }
     }
 
-    private void setOldValuesToZero() {
+    protected void setOldValuesToZero() {
         for (int k = 1; k < layers.length - 1; k++) {
             ((RecurrentLayer) layers[k]).setValuesToZero();
         }
     }
 
     @Override
-    protected void feedForward() {
+    protected void feedForward() throws VectorSizeMismatch {
         for (int i = 0; i < layers.length - 1; i++) {
             for (int j = 0; j < layers[i + 1].size(); j++) {
                 double sum = 0.0;
@@ -121,7 +121,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
     }
 
     @Override
-    public void train(int epoch, double learningRate, double etaDecrease, double momentum) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
+    public void train(int epoch, double learningRate, double etaDecrease, double momentum) throws MatrixRowColumnMismatch, MatrixDimensionMismatch, VectorSizeMismatch {
         LinkedList<Matrix> oldDeltaWeights = new LinkedList<>();
         for (int i = 0; i < epoch; i++) {
             instanceList.shuffle(seed);
@@ -140,7 +140,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         }
     }
 
-    public LinkedList<String> predict(Instance<java.util.Vector<String>> instance) {
+    public LinkedList<String> predict(Instance<java.util.Vector<String>> instance) throws VectorSizeMismatch {
         setOldValuesToZero();
         LinkedList<String> classes = new LinkedList<>();
         for (int i = 0; i < instance.size(); i += 2) {
@@ -168,7 +168,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         return classes;
     }
 
-    public double test(VectorizedInstanceList list) {
+    public double test(VectorizedInstanceList list) throws VectorSizeMismatch {
         int correct = 0;
         int total = 0;
         for (int i = 0; i < list.size(); i++) {

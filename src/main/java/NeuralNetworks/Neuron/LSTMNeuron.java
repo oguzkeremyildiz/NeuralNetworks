@@ -10,7 +10,7 @@ public class LSTMNeuron extends RecurrentNeuron implements Serializable {
     private final double[] addGateRecurrent;
     private final double[] gGate;
     private final double[] gGateRecurrent;
-    private double contextValue;
+    private double oldContextValue, contextValue;
 
     public LSTMNeuron(double[] weights, double[] recurrentWeights, double[] forgetGate, double[] forgetGateRecurrent, double[] addGate, double[] addGateRecurrent, double[] gGate, double[] gGateRecurrent) {
         super(weights, recurrentWeights);
@@ -21,6 +21,7 @@ public class LSTMNeuron extends RecurrentNeuron implements Serializable {
         this.gGate = gGate;
         this.gGateRecurrent = gGateRecurrent;
         this.contextValue = 0.0;
+        this.oldContextValue = 0.0;
     }
 
     public LSTMNeuron(double[] weights, double[] forgetGate, double[] addGate, double[] gGate) {
@@ -32,6 +33,7 @@ public class LSTMNeuron extends RecurrentNeuron implements Serializable {
         this.gGate = gGate;
         this.gGateRecurrent = null;
         this.contextValue = 0.0;
+        this.oldContextValue = 0.0;
     }
 
     public double getForgetGateWeight(int i) {
@@ -64,5 +66,17 @@ public class LSTMNeuron extends RecurrentNeuron implements Serializable {
 
     public void setContextValue(double contextValue) {
         this.contextValue = contextValue;
+    }
+
+    public double getOldContextValue() {
+        return oldContextValue;
+    }
+
+    public void setOldContextValue(double oldContextValue) {
+        this.oldContextValue = oldContextValue;
+    }
+
+    public void setOldContextValue() {
+        this.oldContextValue = this.contextValue;
     }
 }

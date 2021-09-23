@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class RecurrentNeuralNetworkTest {
 
     @Test
-    public void testShallowParse() throws MatrixDimensionMismatch, MatrixRowColumnMismatch {
+    public void testShallowParse() throws MatrixDimensionMismatch, MatrixRowColumnMismatch, VectorSizeMismatch {
         VectorizedInstanceList trainList = null, testList = null;
         ObjectInputStream outObject;
         try {
@@ -36,7 +36,7 @@ public class RecurrentNeuralNetworkTest {
     }
 
     @Test
-    public void testNER() throws MatrixDimensionMismatch, MatrixRowColumnMismatch {
+    public void testNER() throws MatrixDimensionMismatch, MatrixRowColumnMismatch, VectorSizeMismatch {
         VectorizedInstanceList trainList = null, testList = null;
         ObjectInputStream outObject;
         try {
@@ -59,7 +59,7 @@ public class RecurrentNeuralNetworkTest {
     }
 
     @Test
-    public void testSentiment() throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
+    public void testSentiment() throws MatrixRowColumnMismatch, MatrixDimensionMismatch, VectorSizeMismatch {
         VectorizedInstanceList trainList = null, testList = null;
         ObjectInputStream outObject;
         try {

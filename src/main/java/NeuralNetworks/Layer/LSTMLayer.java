@@ -5,6 +5,7 @@ import NeuralNetworks.Neuron.Neuron;
 
 import java.io.Serializable;
 import java.util.Random;
+import Math.*;
 
 public class LSTMLayer extends RecurrentLayer implements Serializable {
 
@@ -41,5 +42,26 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
                 neurons[i] = new LSTMNeuron(weights, forgetWeights, addWeights, gWeights);
             }
         }
+    }
+
+    public void setContextValuesToZero() {
+        for (Neuron neuron : this.neurons) {
+            ((LSTMNeuron) neuron).setOldContextValue(0);
+        }
+    }
+
+    public void setContextValues() {
+        for (Neuron neuron : this.neurons) {
+            ((LSTMNeuron) neuron).setOldContextValue();
+        }
+    }
+
+    public Vector oldContextValuesToVector() {
+        Vector vector = new Vector(this.neurons.length, 0);
+        for (int i = 0; i < this.neurons.length; i++) {
+            Neuron neuron = this.neurons[i];
+            vector.addValue(i, ((LSTMNeuron) neuron).getOldContextValue());
+        }
+        return vector;
     }
 }
