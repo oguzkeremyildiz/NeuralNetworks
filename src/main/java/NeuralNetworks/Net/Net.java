@@ -14,6 +14,7 @@ import NeuralNetworks.Layer.RecurrentLayer;
 import NeuralNetworks.Neuron.Bias;
 import NeuralNetworks.InstanceList.BasicInstanceList;
 import NeuralNetworks.Layer.Layer;
+import NeuralNetworks.Neuron.LSTMBias;
 
 public abstract class Net<T> implements Serializable {
 
@@ -75,6 +76,9 @@ public abstract class Net<T> implements Serializable {
             case LEAKYRELU:
                 function = new LeakyReLU();
                 break;
+            case ELU:
+                function = new ELU();
+                break;
             default:
                 function = new Linear();
                 break;
@@ -82,8 +86,15 @@ public abstract class Net<T> implements Serializable {
         this.function = function;
         this.seed = seed;
         biases = new Bias[hiddenLayers.size() - 1];
-        for (int i = 0; i < biases.length; i++) {
-            biases[i] = new Bias(seed, hiddenLayers.get(i + 1));
+        if (type == NetworkType.LSTM) {
+            for (int i = 0; i < biases.length - 1; i++) {
+                biases[i] = new LSTMBias(seed, hiddenLayers.get(i + 1));
+            }
+            biases[biases.length - 1] = new Bias(seed, hiddenLayers.get(biases.length));
+        } else {
+            for (int i = 0; i < biases.length; i++) {
+                biases[i] = new Bias(seed, hiddenLayers.get(i + 1));
+            }
         }
     }
 

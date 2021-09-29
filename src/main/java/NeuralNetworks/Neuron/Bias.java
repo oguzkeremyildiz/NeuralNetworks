@@ -15,16 +15,8 @@ public class Bias implements Serializable {
         }
     }
 
-    public Bias(int size) {
-        this.weights = new double[size];
-    }
-
     public double getValue(int i) {
         return weights[i];
-    }
-
-    public void setWeight(int index, double weight) {
-        this.weights[index] = weight;
     }
 
     public void addWeight(int index, double weight) {

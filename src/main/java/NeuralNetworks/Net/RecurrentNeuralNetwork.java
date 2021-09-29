@@ -5,8 +5,7 @@ import NeuralNetworks.InstanceList.Instance;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.Vector;
+import java.util.LinkedList;
 
 import Math.*;
 import NeuralNetworks.Layer.RecurrentLayer;
@@ -126,7 +125,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         for (int i = 0; i < epoch; i++) {
             instanceList.shuffle(seed);
             for (int j = 0; j < instanceList.size(); j++) {
-                Instance<Vector<String>> instance = instanceList.getInstance(j);
+                Instance<java.util.Vector<String>> instance = instanceList.getInstance(j);
                 for (int k = 0; k < instance.size(); k += 2) {
                     createInputVector(instance.get(k));
                     String classInfo = instance.get(k + 1).get(0);
