@@ -4,23 +4,21 @@ import NeuralNetworks.Neuron.LSTMNeuron;
 import NeuralNetworks.Neuron.Neuron;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Random;
 import Math.*;
 
 public class LSTMLayer extends RecurrentLayer implements Serializable {
 
-    private final Vector vector;
-    private final Vector forgetVector;
-    private final Vector addVector;
-    private final Vector gVector;
+    private final LinkedList<Vector> vectors;
 
     public LSTMLayer(int size, int nextSize, int seed, boolean isHidden) {
         super();
         this.size = size;
-        this.vector = new Vector(size, 0);
-        this.forgetVector = new Vector(size, 0);
-        this.addVector = new Vector(size, 0);
-        this.gVector = new Vector(size, 0);
+        this.vectors = new LinkedList<>();
+        for (int i = 0; i < 4; i++) {
+            vectors.add(new Vector(size, 0));
+        }
         this.nextSize = nextSize;
         Random random = new Random(seed);
         this.neurons = new Neuron[size];
@@ -76,66 +74,13 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
     }
 
     public void clear() {
-        vector.clear();
-        forgetVector.clear();
-        addVector.clear();
-        gVector.clear();
+        for (Vector vector : this.vectors) {
+            vector.clear();
+        }
     }
 
-    public Vector forgetVectorElementProduct(Vector vector) throws VectorSizeMismatch {
-        return forgetVector.elementProduct(vector);
-    }
-
-    public Vector addVectorElementProduct() throws VectorSizeMismatch {
-        return addVector.elementProduct(gVector);
-    }
-
-    public void addVector(int index, double value) {
-        vector.addValue(index, value);
-    }
-
-    public double getVector(int index) {
-        return vector.getValue(index);
-    }
-
-    public void setVector(int index, double value) {
-        vector.setValue(index, value);
-    }
-
-    public void addForgetVector(int index, double value) {
-        forgetVector.addValue(index, value);
-    }
-
-    public double getForgetVector(int index) {
-        return forgetVector.getValue(index);
-    }
-
-    public void setForgetVector(int index, double value) {
-        forgetVector.setValue(index, value);
-    }
-
-    public void addAddVector(int index, double value) {
-        addVector.addValue(index, value);
-    }
-
-    public double getAddVector(int index) {
-        return addVector.getValue(index);
-    }
-
-    public void setAddVector(int index, double value) {
-        addVector.setValue(index, value);
-    }
-
-    public void addGVector(int index, double value) {
-        gVector.addValue(index, value);
-    }
-
-    public double getGVector(int index) {
-        return gVector.getValue(index);
-    }
-
-    public void setGVector(int index, double value) {
-        gVector.setValue(index, value);
+    public Vector getVector(int index) {
+        return this.vectors.get(index);
     }
 
     public Matrix forgetGateWeightsToMatrix() {
@@ -143,6 +88,26 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
                 weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getForgetGateWeight(j));
+            }
+        }
+        return weights;
+    }
+
+    public Matrix addGateWeightsToMatrix() {
+        Matrix weights = new Matrix(size, nextSize);
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < nextSize; j++) {
+                weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getAddGateWeight(j));
+            }
+        }
+        return weights;
+    }
+
+    public Matrix gGateWeightsToMatrix() {
+        Matrix weights = new Matrix(size, nextSize);
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < nextSize; j++) {
+                weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getGGateWeight(j));
             }
         }
         return weights;

@@ -38,33 +38,33 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
     private void calculateForwardVectors(int layer) {
         LSTMLayer lstmLayer = ((LSTMLayer) layers[layer + 1]);
         for (int i = 0; i < layers[layer + 1].size(); i++) {
-            lstmLayer.addVector(i, biases[layer].getValue(i));
-            lstmLayer.addForgetVector(i, ((LSTMBias) biases[layer]).getForgetGateValue(i));
-            lstmLayer.addAddVector(i, ((LSTMBias) biases[layer]).getAddGateValue(i));
-            lstmLayer.addGVector(i, ((LSTMBias) biases[layer]).getGGateValue(i));
+            lstmLayer.getVector(0).addValue(i, biases[layer].getValue(i));
+            lstmLayer.getVector(1).addValue(i, ((LSTMBias) biases[layer]).getForgetGateValue(i));
+            lstmLayer.getVector(2).addValue(i, ((LSTMBias) biases[layer]).getAddGateValue(i));
+            lstmLayer.getVector(3).addValue(i, ((LSTMBias) biases[layer]).getGGateValue(i));
             for (int j = 0; j < layers[layer].size(); j++) {
-                lstmLayer.addVector(i, layers[layer].getNeuron(j).getValue() * layers[layer].getNeuron(j).getWeight(i));
-                lstmLayer.addForgetVector(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getForgetGateWeight(i));
-                lstmLayer.addAddVector(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getAddGateWeight(i));
-                lstmLayer.addGVector(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getGGateWeight(i));
+                lstmLayer.getVector(0).addValue(i, layers[layer].getNeuron(j).getValue() * layers[layer].getNeuron(j).getWeight(i));
+                lstmLayer.getVector(1).addValue(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getForgetGateWeight(i));
+                lstmLayer.getVector(2).addValue(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getAddGateWeight(i));
+                lstmLayer.getVector(3).addValue(i, layers[layer].getNeuron(j).getValue() * ((LSTMNeuron) layers[layer].getNeuron(j)).getGGateWeight(i));
                 if (layer + 1 != layers.length - 1) {
                     for (int k = 0; k < layers[layer + 1].size(); k++) {
-                        lstmLayer.addVector(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getRecurrentWeight(i));
-                        lstmLayer.addForgetVector(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getForgetGateRecurrentWeight(i));
-                        lstmLayer.addAddVector(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getAddGateRecurrentWeight(i));
-                        lstmLayer.addGVector(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getGGateRecurrentWeight(i));
+                        lstmLayer.getVector(0).addValue(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getRecurrentWeight(i));
+                        lstmLayer.getVector(1).addValue(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getForgetGateRecurrentWeight(i));
+                        lstmLayer.getVector(2).addValue(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getAddGateRecurrentWeight(i));
+                        lstmLayer.getVector(3).addValue(i, ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getOldValue() * ((LSTMNeuron) layers[layer + 1].getNeuron(k)).getGGateRecurrentWeight(i));
                     }
                 }
             }
         }
         for (int i = 0; i < layers[layer + 1].size(); i++) {
-            lstmLayer.setVector(i, function.calculateForward(lstmLayer.getVector(i)));
-            lstmLayer.setForgetVector(i, function.calculateForward(lstmLayer.getForgetVector(i)));
-            lstmLayer.setAddVector(i, function.calculateForward(lstmLayer.getAddVector(i)));
+            lstmLayer.getVector(0).setValue(i, function.calculateForward(lstmLayer.getVector(0).getValue(i)));
+            lstmLayer.getVector(1).setValue(i, function.calculateForward(lstmLayer.getVector(1).getValue(i)));
+            lstmLayer.getVector(2).setValue(i, function.calculateForward(lstmLayer.getVector(2).getValue(i)));
         }
         for (int i = 0; i < layers[layer + 1].size(); i++) {
-            double value = lstmLayer.getGVector(i);
-            lstmLayer.setGVector(i, tanh.calculateForward(value));
+            double value = lstmLayer.getVector(3).getValue(i);
+            lstmLayer.getVector(3).setValue(i, tanh.calculateForward(value));
         }
     }
 
@@ -74,11 +74,11 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
             LSTMLayer layer = (LSTMLayer) layers[i + 1];
             layer.clear();
             calculateForwardVectors(i);
-            Vector k = layer.forgetVectorElementProduct(((LSTMLayer) layers[i + 1]).oldContextValuesToVector());
-            Vector j = layer.addVectorElementProduct();
+            Vector k = layer.getVector(1).elementProduct(((LSTMLayer) layers[i + 1]).oldContextValuesToVector());
+            Vector j = layer.getVector(2).elementProduct(layer.getVector(3));
             for (int l = 0; l < layers[i + 1].size(); l++) {
                 ((LSTMNeuron) layers[i + 1].getNeuron(l)).setContextValue(j.getValue(l) + k.getValue(l));
-                layers[i + 1].getNeuron(l).setValue(layer.getVector(l) * tanh.calculateForward(((LSTMNeuron) layers[i + 1].getNeuron(l)).getContextValue()));
+                layers[i + 1].getNeuron(l).setValue(layer.getVector(0).getValue(l) * tanh.calculateForward(((LSTMNeuron) layers[i + 1].getNeuron(l)).getContextValue()));
             }
         }
         for (int i = 0; i < layers[layers.length - 1].size(); i++) {
@@ -108,7 +108,21 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
 
     private LinkedList<Matrix> calculateErrors(int i, LinkedList<Matrix> deltaWeights) throws MatrixDimensionMismatch, MatrixRowColumnMismatch {
         LinkedList<Matrix> errors = new LinkedList<>();
+        deltaWeights.set(0, layers[i + 1].weightsToMatrix().multiply(deltaWeights.getFirst()));
+        if (i == layers.length - 3) {
+            deltaWeights.set(1, layers[i + 1].weightsToMatrix().multiply(deltaWeights.get(1)));
+            deltaWeights.set(2, layers[i + 1].weightsToMatrix().multiply(deltaWeights.get(2)));
+            deltaWeights.set(3, layers[i + 1].weightsToMatrix().multiply(deltaWeights.get(3)));
+        } else {
+            deltaWeights.set(1, ((LSTMLayer) layers[i + 1]).forgetGateWeightsToMatrix().multiply(deltaWeights.get(1)));
+            deltaWeights.set(2, ((LSTMLayer) layers[i + 1]).addGateWeightsToMatrix().multiply(deltaWeights.get(2)));
+            deltaWeights.set(3, ((LSTMLayer) layers[i + 1]).gGateWeightsToMatrix().multiply(deltaWeights.get(3)));
+        }
 
+        errors.add(deltaWeights.getFirst());
+        errors.add(deltaWeights.get(1));
+        errors.add(deltaWeights.get(2));
+        errors.add(deltaWeights.get(3));
         return errors;
     }
 
