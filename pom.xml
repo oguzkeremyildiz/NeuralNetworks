@@ -37,6 +37,11 @@
             <artifactId>WordToVec</artifactId>
             <version>1.0.4</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.starlangsoftware</groupId>
+            <artifactId>Math</artifactId>
+            <version>1.0.7</version>
+        </dependency>
     </dependencies>
 
     <name>NeuralNetworks</name>

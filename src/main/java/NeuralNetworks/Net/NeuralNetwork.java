@@ -61,10 +61,12 @@ public class NeuralNetwork extends Net<String> implements Serializable {
         LinkedList<Matrix> deltaWeights = new LinkedList<>();
         calculateRMinusY(deltaWeights, classInfo, learningRate);
         for (int i = layers.length - 3; i > -1; i--) {
-            Matrix currentError = calculateError(i, deltaWeights);
-            deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[i].neuronsToMatrix()));
+            calculateError(i, deltaWeights);
             if (i > 0) {
-                deltaWeights.addFirst(currentError);
+                deltaWeights.addFirst(deltaWeights.getFirst());
+                deltaWeights.set(1, deltaWeights.get(1).multiply(layers[i].neuronsToMatrix()));
+            } else {
+                deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[i].neuronsToMatrix()));
             }
         }
         setWeights(deltaWeights, oldDeltaWeights, momentum);

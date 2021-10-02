@@ -126,10 +126,9 @@ public abstract class Net<T> implements Serializable {
         }
     }
 
-    protected Matrix calculateError(int i, LinkedList<Matrix> deltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
+    protected void calculateError(int i, LinkedList<Matrix> deltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
         deltaWeights.set(0, layers[i + 1].weightsToMatrix().multiply(deltaWeights.getFirst()));
         deltaWeights.set(0, deltaWeights.getFirst().elementProduct(function.calculateBack(layers[i + 1].neuronsToVector())));
-        return deltaWeights.getFirst();
     }
 
     public void save(String fileName) {

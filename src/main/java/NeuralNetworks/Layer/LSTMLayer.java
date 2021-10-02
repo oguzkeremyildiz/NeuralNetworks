@@ -16,7 +16,7 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
         super();
         this.size = size;
         this.vectors = new LinkedList<>();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             vectors.add(new Vector(size, 0));
         }
         this.nextSize = nextSize;

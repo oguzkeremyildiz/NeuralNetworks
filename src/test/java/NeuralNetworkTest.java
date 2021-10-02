@@ -18,11 +18,11 @@ public class NeuralNetworkTest {
     public void testTrain() throws InputSizeException, FileNotFoundException, MatrixDimensionMismatch, MatrixRowColumnMismatch {
         InstanceList list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/dermatology.txt")), ",");
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
-        hiddenLayers.add(20);
+        hiddenLayers.add(25);
         NeuralNetwork net = new NeuralNetwork(1, hiddenLayers, list, Activation.SIGMOID);
         net.train(1000, 0.01, 0.99, 0.5);
         double accuracy = net.test(list);
-        assertEquals(99.72677595628416, accuracy, 0.01);
+        assertEquals(100.0, accuracy, 0.01);
         list = new InstanceList(new Scanner(new File("src/main/resources/Dataset/bupa.txt")), ",");
         hiddenLayers = new LinkedList<>();
         hiddenLayers.add(15);

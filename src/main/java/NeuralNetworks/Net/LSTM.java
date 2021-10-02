@@ -78,7 +78,9 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
             Vector j = layer.getVector(2).elementProduct(layer.getVector(3));
             for (int l = 0; l < layers[i + 1].size(); l++) {
                 ((LSTMNeuron) layers[i + 1].getNeuron(l)).setContextValue(j.getValue(l) + k.getValue(l));
-                layers[i + 1].getNeuron(l).setValue(layer.getVector(0).getValue(l) * tanh.calculateForward(((LSTMNeuron) layers[i + 1].getNeuron(l)).getContextValue()));
+                double value = tanh.calculateForward(((LSTMNeuron) layers[i + 1].getNeuron(l)).getContextValue());
+                layer.getVector(4).setValue(l, value);
+                layers[i + 1].getNeuron(l).setValue(layer.getVector(0).getValue(l) * value);
             }
         }
         for (int i = 0; i < layers[layers.length - 1].size(); i++) {
@@ -106,8 +108,7 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
         }
     }
 
-    private LinkedList<Matrix> calculateErrors(int i, LinkedList<Matrix> deltaWeights) throws MatrixDimensionMismatch, MatrixRowColumnMismatch {
-        LinkedList<Matrix> errors = new LinkedList<>();
+    protected void calculateError(int i, LinkedList<Matrix> deltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
         deltaWeights.set(0, layers[i + 1].weightsToMatrix().multiply(deltaWeights.getFirst()));
         if (i == layers.length - 3) {
             deltaWeights.set(1, layers[i + 1].weightsToMatrix().multiply(deltaWeights.get(1)));
@@ -118,12 +119,10 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
             deltaWeights.set(2, ((LSTMLayer) layers[i + 1]).addGateWeightsToMatrix().multiply(deltaWeights.get(2)));
             deltaWeights.set(3, ((LSTMLayer) layers[i + 1]).gGateWeightsToMatrix().multiply(deltaWeights.get(3)));
         }
-
-        errors.add(deltaWeights.getFirst());
-        errors.add(deltaWeights.get(1));
-        errors.add(deltaWeights.get(2));
-        errors.add(deltaWeights.get(3));
-        return errors;
+        deltaWeights.set(0, deltaWeights.getFirst().elementProduct(((LSTMLayer) layers[i + 1]).getVector(4)).elementProduct(function.calculateBack(((LSTMLayer) layers[i + 1]).getVector(0))));
+        deltaWeights.set(1, deltaWeights.get(1).elementProduct(((LSTMLayer) layers[i + 1]).getVector(0)).elementProduct(tanh.calculateBack(((LSTMLayer) layers[i + 1]).getVector(4))).elementProduct(((LSTMLayer) layers[i + 1]).oldContextValuesToVector()).elementProduct(function.calculateBack(((LSTMLayer) layers[i + 1]).getVector(1))));
+        deltaWeights.set(2, deltaWeights.get(2).elementProduct(((LSTMLayer) layers[i + 1]).getVector(0)));
+        deltaWeights.set(3, deltaWeights.get(3).elementProduct(((LSTMLayer) layers[i + 1]).getVector(0)));
     }
 
     @Override
@@ -131,20 +130,29 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
         LinkedList<Matrix> deltaWeights = new LinkedList<>();
         calculateRMinusY(deltaWeights, classInfo, learningRate);
         for (int i = layers.length - 3; i > -1; i--) {
-            LinkedList<Matrix> errors = calculateErrors(i, deltaWeights);
-            deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[i].neuronsToMatrix()));
-            deltaWeights.set(1, deltaWeights.get(1).multiply(layers[i].neuronsToMatrix()));
-            deltaWeights.set(2, deltaWeights.get(2).multiply(layers[i].neuronsToMatrix()));
-            deltaWeights.set(3, deltaWeights.get(3).multiply(layers[i].neuronsToMatrix()));
-            deltaWeights.add(4, errors.getFirst().multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
-            deltaWeights.add(5, errors.get(1).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
-            deltaWeights.add(6, errors.get(2).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
-            deltaWeights.add(7, errors.get(3).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+            calculateError(i, deltaWeights);
             if (i > 0) {
-                deltaWeights.addFirst(errors.getFirst());
-                deltaWeights.add(1, errors.get(1));
-                deltaWeights.add(2, errors.get(2));
-                deltaWeights.add(3, errors.get(3));
+                deltaWeights.addFirst(deltaWeights.getFirst());
+                deltaWeights.add(1, deltaWeights.get(1));
+                deltaWeights.add(2, deltaWeights.get(2));
+                deltaWeights.add(3, deltaWeights.get(3));
+                deltaWeights.add(8, deltaWeights.get(4).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(9, deltaWeights.get(5).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(10, deltaWeights.get(6).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(11, deltaWeights.get(7).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.set(4, deltaWeights.get(4).multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(5, deltaWeights.get(5).multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(6, deltaWeights.get(6).multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(7, deltaWeights.get(7).multiply(layers[i].neuronsToMatrix()));
+            } else {
+                deltaWeights.add(4, deltaWeights.getFirst().multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(5, deltaWeights.get(1).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(6, deltaWeights.get(2).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.add(7, deltaWeights.get(3).multiply(((LSTMLayer) layers[i + 1]).oldNeuronsToMatrix()));
+                deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(1, deltaWeights.get(1).multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(2, deltaWeights.get(2).multiply(layers[i].neuronsToMatrix()));
+                deltaWeights.set(3, deltaWeights.get(3).multiply(layers[i].neuronsToMatrix()));
             }
         }
         setWeights(deltaWeights, oldDeltaWeights, momentum);
