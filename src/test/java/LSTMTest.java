@@ -26,13 +26,12 @@ public class LSTMTest {
             e.printStackTrace();
         }
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
-        hiddenLayers.add(10);
-        hiddenLayers.add(15);
-        LSTM net = new LSTM(1, hiddenLayers, trainList, Activation.RELU);
-        net.train(100, 0.2, 0.99, 0.0);
+        hiddenLayers.add(20);
+        LSTM net = new LSTM(1, hiddenLayers, trainList, Activation.SIGMOID);
+        net.train(100, 0.2, 0.99, 0.5);
         if (testList != null) {
             double accuracy = net.test(testList);
-            assertEquals(17.702408538726214, accuracy, 0.01);
+            assertEquals(54.71525875991855, accuracy, 0.01);
         }
     }
 }

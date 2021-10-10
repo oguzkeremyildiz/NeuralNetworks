@@ -62,6 +62,21 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
         }
     }
 
+    protected void setLastWeights(Matrix weights, LinkedList<Matrix> oldDeltaWeights, double momentum) {
+        for (int i = 0; i < weights.getRow(); i++) {
+            for (int j = 0; j < weights.getColumn(); j++) {
+                if (!oldDeltaWeights.isEmpty()) {
+                    weights.addValue(i, j, momentum * oldDeltaWeights.getLast().getValue(i, j));
+                }
+                if (j > 0) {
+                    layers[layers.length - 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
+                } else {
+                    biases[layers.length - 2].addWeight(i, weights.getValue(i, j));
+                }
+            }
+        }
+    }
+
     @Override
     protected void setWeights(LinkedList<Matrix> deltaWeights, LinkedList<Matrix> oldDeltaWeights, double momentum) {
         for (int t = 0; t < deltaWeights.size() - 1; t += 2) {
@@ -88,19 +103,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
                 }
             }
         }
-        Matrix weights = deltaWeights.getLast();
-        for (int i = 0; i < weights.getRow(); i++) {
-            for (int j = 0; j < weights.getColumn(); j++) {
-                if (!oldDeltaWeights.isEmpty()) {
-                    weights.addValue(i, j, momentum * oldDeltaWeights.getLast().getValue(i, j));
-                }
-                if (j > 0) {
-                    layers[layers.length - 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
-                } else {
-                    biases[layers.length - 2].addWeight(i, weights.getValue(i, j));
-                }
-            }
-        }
+        setLastWeights(deltaWeights.getLast(), oldDeltaWeights, momentum);
     }
 
     @Override
