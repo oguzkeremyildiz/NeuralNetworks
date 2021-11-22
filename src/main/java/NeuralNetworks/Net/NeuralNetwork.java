@@ -34,8 +34,22 @@ public class NeuralNetwork extends Net<String> implements Serializable {
     }
 
     private void createInputVector(Instance<String> instance) {
-        for (int i = 0; i < layers[0].size(); i++) {
-            layers[0].getNeuron(i).setValue(Double.parseDouble(instance.get(i)));
+        int currentIndex = 0;
+        for (int i = 0; i < instance.size() - 1; i++) {
+            if (instance.size() - 1 != layers[0].size()) {
+                int mapSize = ((InstanceList) instanceList).mapSize(i);
+                int featureIndex = ((InstanceList) instanceList).getFeature(i, instance.get(i));
+                for (int j = 0; j < mapSize; j++) {
+                    if (featureIndex != j) {
+                        layers[0].getNeuron(currentIndex).setValue(0.0);
+                    } else {
+                        layers[0].getNeuron(currentIndex).setValue(1.0);
+                    }
+                    currentIndex++;
+                }
+            } else {
+                layers[0].getNeuron(i).setValue(Double.parseDouble(instance.get(i)));
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 import Math.*;
+import NeuralNetworks.InstanceList.InstanceList;
 import NeuralNetworks.Layer.LSTMLayer;
 import NeuralNetworks.Layer.RecurrentLayer;
 import NeuralNetworks.Neuron.Bias;
@@ -31,6 +32,10 @@ public abstract class Net<T> implements Serializable {
         this.layers = new Layer[hiddenLayers.size()];
         switch (type) {
             case NEURALNETWORK:
+                int inputSize = ((InstanceList) instanceList).inputSize();
+                if (inputSize > -1) {
+                    hiddenLayers.set(0, inputSize);
+                }
                 for (int i = 0; i < hiddenLayers.size(); i++) {
                     if (i + 1 < hiddenLayers.size()) {
                         this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
