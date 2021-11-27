@@ -79,6 +79,6 @@ Use below line to generate jar file:
         <dependency>
             <groupId>io.github.oguzkeremyildiz</groupId>
             <artifactId>NeuralNetworks</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
         </dependency>
 
