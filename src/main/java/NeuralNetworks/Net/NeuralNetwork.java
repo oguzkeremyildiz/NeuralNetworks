@@ -14,6 +14,10 @@ public class NeuralNetwork extends Net<String> implements Serializable {
         super(seed, activation, instanceList, hiddenLayers, NetworkType.NEURALNETWORK);
     }
 
+    public NeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, InstanceList instanceList, ActivationFunction activation) {
+        super(seed, activation, instanceList, hiddenLayers, NetworkType.NEURALNETWORK);
+    }
+
     protected void feedForward() {
         for (int i = 0; i < layers.length - 1; i++) {
             for (int j = 0; j < layers[i + 1].size(); j++) {

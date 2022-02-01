@@ -21,6 +21,11 @@ public class LSTM extends RecurrentNeuralNetwork implements Serializable {
         tanh = new TanH();
     }
 
+    public LSTM(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, ActivationFunction activation) {
+        super(seed, hiddenLayers, instanceList, activation, NetworkType.LSTM);
+        tanh = new TanH();
+    }
+
     protected void setOldValues() {
         for (int k = 1; k < layers.length - 1; k++) {
             ((LSTMLayer) layers[k]).setValues();

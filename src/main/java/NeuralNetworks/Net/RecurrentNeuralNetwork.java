@@ -1,6 +1,7 @@
 package NeuralNetworks.Net;
 
 import NeuralNetworks.ActivationFunction.Activation;
+import NeuralNetworks.ActivationFunction.ActivationFunction;
 import NeuralNetworks.InstanceList.Instance;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 
@@ -18,6 +19,14 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
     }
 
     public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation, NetworkType type) {
+        super(seed, activation, instanceList, hiddenLayers, type);
+    }
+
+    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, ActivationFunction activation) {
+        super(seed, activation, instanceList, hiddenLayers, NetworkType.RECURRENTNEURALNETWORK);
+    }
+
+    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, ActivationFunction activation, NetworkType type) {
         super(seed, activation, instanceList, hiddenLayers, type);
     }
 
