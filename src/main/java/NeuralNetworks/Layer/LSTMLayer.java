@@ -1,7 +1,6 @@
 package NeuralNetworks.Layer;
 
-import NeuralNetworks.Neuron.LSTMNeuron;
-import NeuralNetworks.Neuron.Neuron;
+import NeuralNetworks.Initializer.InitializerFunction;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -11,64 +10,53 @@ import Math.*;
 public class LSTMLayer extends RecurrentLayer implements Serializable {
 
     private final LinkedList<Vector> vectors;
+    private final double[][][] lstmWeights;
+    private final double[][][] recurrentLstmWeights;
+    private final double[] contextValues;
+    private final double[] oldContextValues;
 
-    public LSTMLayer(int size, int nextSize, int seed, boolean isHidden) {
-        super();
-        this.size = size;
+    public LSTMLayer(int s, LinkedList<Integer> hiddenLayers, int seed, boolean isHidden, InitializerFunction function) {
+        super(s, hiddenLayers, seed, function);
         this.vectors = new LinkedList<>();
         for (int i = 0; i < 5; i++) {
             vectors.add(new Vector(size, 0));
         }
-        this.nextSize = nextSize;
         Random random = new Random(seed);
-        this.neurons = new Neuron[size];
-        for (int i = 0; i < neurons.length; i++) {
-            double[] weights = new double[nextSize];
-            double[] forgetWeights = new double[nextSize];
-            double[] addWeights = new double[nextSize];
-            double[] gWeights = new double[nextSize];
-            for (int j = 0; j < nextSize; j++) {
-                weights[j] = 2 * random.nextDouble() - 1;
-                forgetWeights[j] = 2 * random.nextDouble() - 1;
-                addWeights[j] = 2 * random.nextDouble() - 1;
-                gWeights[j] = 2 * random.nextDouble() - 1;
-            }
-            if (isHidden) {
-                double[] recurrentWeights = new double[size];
-                double[] forgetRecurrentWeights = new double[size];
-                double[] addRecurrentWeights = new double[size];
-                double[] gRecurrentWeights = new double[size];
-                for (int j = 0; j < size; j++) {
-                    recurrentWeights[j] = 2 * random.nextDouble() - 1;
-                    forgetRecurrentWeights[j] = 2 * random.nextDouble() - 1;
-                    addRecurrentWeights[j] = 2 * random.nextDouble() - 1;
-                    gRecurrentWeights[j] = 2 * random.nextDouble() - 1;
+        this.lstmWeights = new double[3][size][nextSize];
+        this.recurrentLstmWeights = new double[3][size][size];
+        this.contextValues = new double[size];
+        this.oldContextValues = new double[size];
+        for (int i = 0; i < lstmWeights.length; i++) {
+            for (int j = 0; j < lstmWeights[i].length; j++) {
+                for (int k = 0; k < lstmWeights[i][j].length; k++) {
+                    this.lstmWeights[i][j][k] = function.calculate(random);
                 }
-                neurons[i] = new LSTMNeuron(weights, recurrentWeights, forgetWeights, forgetRecurrentWeights, addWeights, addRecurrentWeights, gWeights, gRecurrentWeights);
-            } else {
-                neurons[i] = new LSTMNeuron(weights, forgetWeights, addWeights, gWeights);
+                if (isHidden) {
+                    for (int k = 0; k < recurrentLstmWeights[i][j].length; k++) {
+                        this.recurrentLstmWeights[i][j][k] = function.calculate(random);
+                    }
+                }
             }
         }
     }
 
     public void setContextValuesToZero() {
-        for (Neuron neuron : this.neurons) {
-            ((LSTMNeuron) neuron).setOldContextValue(0);
-            ((LSTMNeuron) neuron).setContextValue(0);
+        for (int i = 0; i < contextValues.length; i++) {
+            contextValues[i] = 0.0;
+            oldContextValues[i] = 0.0;
         }
     }
 
     public void setContextValues() {
-        for (Neuron neuron : this.neurons) {
-            ((LSTMNeuron) neuron).setOldContextValue();
+        for (int i = 0; i < contextValues.length; i++) {
+            oldContextValues[i] = contextValues[i];
         }
     }
 
     public Vector oldContextValuesToVector() {
-        Vector vector = new Vector(this.neurons.length, 0);
-        for (int i = 0; i < this.neurons.length; i++) {
-            Neuron neuron = this.neurons[i];
-            vector.addValue(i, ((LSTMNeuron) neuron).getOldContextValue());
+        Vector vector = new Vector(size, 0);
+        for (int i = 0; i < size; i++) {
+            vector.addValue(i, oldContextValues[i]);
         }
         return vector;
     }
@@ -79,15 +67,39 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
         }
     }
 
+    public void setContextValue(int index, double value) {
+        contextValues[index] = value;
+    }
+
+    public double getContextValue(int index) {
+        return contextValues[index];
+    }
+
     public Vector getVector(int index) {
         return this.vectors.get(index);
+    }
+
+    public double getGateRecurrentWeight(int gate, int neuronIndex, int weightIndex) {
+        return recurrentLstmWeights[gate][neuronIndex][weightIndex];
+    }
+
+    public double getGateWeight(int gate, int neuronIndex, int weightIndex) {
+        return lstmWeights[gate][neuronIndex][weightIndex];
+    }
+
+    public void addGateWeight(int gate, int neuronIndex, int weightIndex, double weight) {
+        lstmWeights[gate][neuronIndex][weightIndex] += weight;
+    }
+
+    public void addGateRecurrentWeight(int gate, int neuronIndex, int weightIndex, double weight) {
+        recurrentLstmWeights[gate][neuronIndex][weightIndex] += weight;
     }
 
     public Matrix forgetGateWeightsToMatrix() {
         Matrix weights = new Matrix(size, nextSize);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
-                weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getForgetGateWeight(j));
+                weights.setValue(i, j, lstmWeights[0][i][j]);
             }
         }
         return weights;
@@ -97,7 +109,7 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
         Matrix weights = new Matrix(size, nextSize);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
-                weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getAddGateWeight(j));
+                weights.setValue(i, j, lstmWeights[1][i][j]);
             }
         }
         return weights;
@@ -107,7 +119,7 @@ public class LSTMLayer extends RecurrentLayer implements Serializable {
         Matrix weights = new Matrix(size, nextSize);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
-                weights.setValue(i, j, ((LSTMNeuron) neurons[i]).getGGateWeight(j));
+                weights.setValue(i, j, lstmWeights[2][i][j]);
             }
         }
         return weights;

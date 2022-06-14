@@ -1,5 +1,7 @@
 package NeuralNetworks.Neuron;
 
+import NeuralNetworks.Initializer.InitializerFunction;
+
 import java.io.Serializable;
 import java.util.Random;
 
@@ -7,11 +9,11 @@ public class Bias implements Serializable {
 
     private final double[] weights;
 
-    public Bias(int seed, int size) {
+    public Bias(int seed, int size, InitializerFunction function) {
         Random random = new Random(seed);
         weights = new double[size];
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = 2 * random.nextDouble() - 1;
+            weights[i] = function.calculate(random);
         }
     }
 

@@ -9,155 +9,64 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 import Math.*;
-import NeuralNetworks.InstanceList.InstanceList;
-import NeuralNetworks.Layer.LSTMLayer;
-import NeuralNetworks.Layer.RecurrentLayer;
+import NeuralNetworks.Initializer.Initializer;
+import NeuralNetworks.Initializer.InitializerFunction;
+import NeuralNetworks.Initializer.RandomInitializer;
+import NeuralNetworks.Initializer.XavierInitializer;
 import NeuralNetworks.Neuron.Bias;
 import NeuralNetworks.InstanceList.BasicInstanceList;
 import NeuralNetworks.Layer.Layer;
-import NeuralNetworks.Neuron.LSTMBias;
 
 public abstract class Net<T> implements Serializable {
 
     protected final int seed;
-    protected final ActivationFunction function;
+    protected final LinkedList<ActivationFunction> function;
     protected final BasicInstanceList<T> instanceList;
     protected final Layer[] layers;
     protected final Bias[] biases;
 
-    public Net(int seed, ActivationFunction function, BasicInstanceList<T> instanceList, LinkedList<Integer> hiddenLayers, NetworkType type) {
+    public Net(int seed, LinkedList<Activation> activations, BasicInstanceList<T> instanceList, LinkedList<Integer> hiddenLayers) {
         this.instanceList = instanceList;
         hiddenLayers.addFirst(instanceList.getInput());
         hiddenLayers.addLast(instanceList.getOutput());
         this.layers = new Layer[hiddenLayers.size()];
-        switch (type) {
-            case NEURALNETWORK:
-                int inputSize = ((InstanceList) instanceList).inputSize();
-                if (inputSize > -1) {
-                    hiddenLayers.set(0, inputSize);
-                }
-                for (int i = 0; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
-                break;
-            case RECURRENTNEURALNETWORK:
-                this.layers[0] = new Layer(hiddenLayers.get(0), hiddenLayers.get(1), seed);
-                for (int i = 1; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new RecurrentLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
-                break;
-            case LSTM:
-                this.layers[0] = new LSTMLayer(hiddenLayers.get(0), hiddenLayers.get(1), seed, false);
-                for (int i = 1; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new LSTMLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed, true);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
-                break;
-            default:
-                break;
+        this.function = new LinkedList<>();
+        for (Activation activation : activations) {
+            switch (activation) {
+                case SIGMOID:
+                    function.add(new Sigmoid());
+                    break;
+                case RELU:
+                    function.add(new ReLU());
+                    break;
+                case TANH:
+                    function.add(new TanH());
+                    break;
+                case LEAKYRELU:
+                    function.add(new LeakyReLU());
+                    break;
+                case ELU:
+                    function.add(new ELU());
+                    break;
+                default:
+                    function.add(new Linear());
+                    break;
+            }
         }
-        this.function = function;
         this.seed = seed;
         biases = new Bias[hiddenLayers.size() - 1];
-        if (type == NetworkType.LSTM) {
-            for (int i = 0; i < biases.length - 1; i++) {
-                biases[i] = new LSTMBias(seed, hiddenLayers.get(i + 1));
-            }
-            biases[biases.length - 1] = new Bias(seed, hiddenLayers.get(biases.length));
-        } else {
-            for (int i = 0; i < biases.length; i++) {
-                biases[i] = new Bias(seed, hiddenLayers.get(i + 1));
-            }
-        }
     }
 
-    public Net(int seed, Activation activation, BasicInstanceList<T> instanceList, LinkedList<Integer> hiddenLayers, NetworkType type) {
-        this.instanceList = instanceList;
-        hiddenLayers.addFirst(instanceList.getInput());
-        hiddenLayers.addLast(instanceList.getOutput());
-        this.layers = new Layer[hiddenLayers.size()];
-        switch (type) {
-            case NEURALNETWORK:
-                int inputSize = ((InstanceList) instanceList).inputSize();
-                if (inputSize > -1) {
-                    hiddenLayers.set(0, inputSize);
-                }
-                for (int i = 0; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new Layer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
-                break;
-            case RECURRENTNEURALNETWORK:
-                this.layers[0] = new Layer(hiddenLayers.get(0), hiddenLayers.get(1), seed);
-                for (int i = 1; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new RecurrentLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
-                break;
-            case LSTM:
-                this.layers[0] = new LSTMLayer(hiddenLayers.get(0), hiddenLayers.get(1), seed, false);
-                for (int i = 1; i < hiddenLayers.size(); i++) {
-                    if (i + 1 < hiddenLayers.size()) {
-                        this.layers[i] = new LSTMLayer(hiddenLayers.get(i), hiddenLayers.get(i + 1), seed, true);
-                    } else {
-                        this.layers[i] = new Layer(hiddenLayers.get(i));
-                    }
-                }
+    protected InitializerFunction findInitializerFunction(Initializer initializer, int size) {
+        InitializerFunction initializerFunction;
+        switch (initializer) {
+            case XAVIER:
+                initializerFunction = new XavierInitializer(size);
                 break;
             default:
-                break;
+                initializerFunction = new RandomInitializer();
         }
-        ActivationFunction function;
-        switch (activation) {
-            case SIGMOID:
-                function = new Sigmoid();
-                break;
-            case RELU:
-                function = new ReLU();
-                break;
-            case TANH:
-                function = new TanH();
-                break;
-            case LEAKYRELU:
-                function = new LeakyReLU();
-                break;
-            case ELU:
-                function = new ELU();
-                break;
-            default:
-                function = new Linear();
-                break;
-        }
-        this.function = function;
-        this.seed = seed;
-        biases = new Bias[hiddenLayers.size() - 1];
-        if (type == NetworkType.LSTM) {
-            for (int i = 0; i < biases.length - 1; i++) {
-                biases[i] = new LSTMBias(seed, hiddenLayers.get(i + 1));
-            }
-            biases[biases.length - 1] = new Bias(seed, hiddenLayers.get(biases.length));
-        } else {
-            for (int i = 0; i < biases.length; i++) {
-                biases[i] = new Bias(seed, hiddenLayers.get(i + 1));
-            }
-        }
+        return initializerFunction;
     }
 
     protected abstract void setWeights(LinkedList<Matrix> deltaWeights, LinkedList<Matrix> oldDeltaWeights, double momentum);
@@ -173,13 +82,13 @@ public abstract class Net<T> implements Serializable {
         if (matrix.getRow() > 1) {
             for (int j = 0; j < matrix.getRow(); j++) {
                 if (classInfo == j) {
-                    matrix.setValue(j, 0, learningRate * (1 - layers[layers.length - 1].getNeuron(j).getValue()));
+                    matrix.setValue(j, 0, learningRate * (1 - layers[layers.length - 1].getValue(j)));
                 } else {
-                    matrix.setValue(j, 0, learningRate * -layers[layers.length - 1].getNeuron(j).getValue());
+                    matrix.setValue(j, 0, learningRate * -layers[layers.length - 1].getValue(j));
                 }
             }
         } else {
-            matrix.setValue(0, 0, learningRate * (classInfo - layers[layers.length - 1].getNeuron(0).getValue()));
+            matrix.setValue(0, 0, learningRate * (classInfo - layers[layers.length - 1].getValue(0)));
         }
         deltaWeights.addFirst(matrix);
         deltaWeights.set(0, deltaWeights.getFirst().multiply(layers[layers.length - 2].neuronsToMatrix()));
@@ -190,7 +99,7 @@ public abstract class Net<T> implements Serializable {
 
     protected void calculateError(int i, LinkedList<Matrix> deltaWeights) throws MatrixRowColumnMismatch, MatrixDimensionMismatch {
         deltaWeights.set(0, layers[i + 1].weightsToMatrix().multiply(deltaWeights.getFirst()));
-        deltaWeights.set(0, deltaWeights.getFirst().elementProduct(function.calculateBack(layers[i + 1].neuronsToVector())));
+        deltaWeights.set(0, deltaWeights.getFirst().elementProduct(function.get(i).calculateBack(layers[i + 1].neuronsToVector())));
     }
 
     public void save(String fileName) {

@@ -1,7 +1,7 @@
 package NeuralNetworks.Net;
 
 import NeuralNetworks.ActivationFunction.Activation;
-import NeuralNetworks.ActivationFunction.ActivationFunction;
+import NeuralNetworks.Initializer.Initializer;
 import NeuralNetworks.InstanceList.Instance;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 
@@ -9,30 +9,30 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 import Math.*;
+import NeuralNetworks.Layer.Layer;
 import NeuralNetworks.Layer.RecurrentLayer;
-import NeuralNetworks.Neuron.RecurrentNeuron;
+import NeuralNetworks.Neuron.Bias;
 
 public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implements Serializable {
 
-    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation) {
-        super(seed, activation, instanceList, hiddenLayers, NetworkType.RECURRENTNEURALNETWORK);
-    }
-
-    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, Activation activation, NetworkType type) {
-        super(seed, activation, instanceList, hiddenLayers, type);
-    }
-
-    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, ActivationFunction activation) {
-        super(seed, activation, instanceList, hiddenLayers, NetworkType.RECURRENTNEURALNETWORK);
-    }
-
-    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, ActivationFunction activation, NetworkType type) {
-        super(seed, activation, instanceList, hiddenLayers, type);
+    public RecurrentNeuralNetwork(int seed, LinkedList<Integer> hiddenLayers, VectorizedInstanceList instanceList, LinkedList<Activation> activation, Initializer initializer) {
+        super(seed, activation, instanceList, hiddenLayers);
+        this.layers[0] = new Layer(0, hiddenLayers, seed, findInitializerFunction(initializer, hiddenLayers.get(0)));
+        for (int i = 1; i < hiddenLayers.size(); i++) {
+            if (i + 1 < hiddenLayers.size()) {
+                this.layers[i] = new RecurrentLayer(i, hiddenLayers, seed, findInitializerFunction(initializer, hiddenLayers.get(i)));
+            } else {
+                this.layers[i] = new Layer(hiddenLayers.get(i));
+            }
+        }
+        for (int i = 0; i < biases.length; i++) {
+            biases[i] = new Bias(seed, hiddenLayers.get(i + 1), findInitializerFunction(initializer, hiddenLayers.get(i + 1)));
+        }
     }
 
     private void createInputVector(java.util.Vector<String> inputLayer) {
         for (int i = 0; i < layers[0].size(); i++) {
-            layers[0].getNeuron(i).setValue(Double.parseDouble(inputLayer.get(i)));
+            layers[0].setValue(i, Double.parseDouble(inputLayer.get(i)));
         }
     }
 
@@ -54,16 +54,16 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
             for (int j = 0; j < layers[i + 1].size(); j++) {
                 double sum = 0.0;
                 for (int k = 0; k < layers[i].size(); k++) {
-                    sum += layers[i].getNeuron(k).getWeight(j) * layers[i].getNeuron(k).getValue();
+                    sum += layers[i].getWeight(k, j) * layers[i].getValue(k);
                 }
                 sum += biases[i].getValue(j);
                 if (i + 1 != layers.length - 1) {
                     for (int k = 0; k < layers[i + 1].size(); k++) {
-                        sum += ((RecurrentNeuron) layers[i + 1].getNeuron(k)).getRecurrentWeight(j) * ((RecurrentNeuron) layers[i + 1].getNeuron(k)).getOldValue();
+                        sum += ((RecurrentLayer) layers[i + 1]).getRecurrentWeight(k, j) * ((RecurrentLayer) layers[i + 1]).getOldValue(k);
                     }
-                    sum = function.calculateForward(sum);
+                    sum = function.get(i).calculateForward(sum);
                 }
-                layers[i + 1].getNeuron(j).setValue(sum);
+                layers[i + 1].setValue(j, sum);
             }
         }
         if (layers[layers.length - 1].size() > 2) {
@@ -78,7 +78,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
                     weights.addValue(i, j, momentum * oldDeltaWeights.getLast().getValue(i, j));
                 }
                 if (j > 0) {
-                    layers[layers.length - 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
+                    layers[layers.length - 2].addWeight(j - 1, i, weights.getValue(i, j));
                 } else {
                     biases[layers.length - 2].addWeight(i, weights.getValue(i, j));
                 }
@@ -97,7 +97,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
                         weights.addValue(i, j, momentum * oldDeltaWeights.get(t + 1).getValue(i, j));
                     }
                     if (j > 0) {
-                        layers[t / 2].getNeuron(j - 1).addWeight(i, weights.getValue(i, j));
+                        layers[t / 2].addWeight(j - 1, i, weights.getValue(i, j));
                     } else {
                         biases[t / 2].addWeight(i, weights.getValue(i, j));
                     }
@@ -108,7 +108,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
                     if (!oldDeltaWeights.isEmpty()) {
                         recurrentWeights.addValue(i, j, momentum * oldDeltaWeights.get(t).getValue(i, j));
                     }
-                    ((RecurrentNeuron)layers[(t / 2) + 1].getNeuron(j)).addRecurrentWeight(i, recurrentWeights.getValue(i, j));
+                    ((RecurrentLayer) layers[(t / 2) + 1]).addRecurrentWeight(j, i, recurrentWeights.getValue(i, j));
                 }
             }
         }
@@ -161,7 +161,7 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
             createInputVector(instance.get(i));
             feedForward();
             if (instanceList.getOutput() == 1) {
-                double outputValue = layers[layers.length - 1].getNeuron(0).getValue();
+                double outputValue = layers[layers.length - 1].getValue(0);
                 if (outputValue >= 0.5) {
                     classes.add(instanceList.get(1));
                 }
@@ -170,8 +170,8 @@ public class RecurrentNeuralNetwork extends Net<java.util.Vector<String>> implem
                 double bestValue = Integer.MIN_VALUE;
                 int bestNeuron = -1;
                 for (int j = 0; j < layers[layers.length - 1].size(); j++) {
-                    if (layers[layers.length - 1].getNeuron(j).getValue() > bestValue) {
-                        bestValue = layers[layers.length - 1].getNeuron(j).getValue();
+                    if (layers[layers.length - 1].getValue(j) > bestValue) {
+                        bestValue = layers[layers.length - 1].getValue(j);
                         bestNeuron = j;
                     }
                 }

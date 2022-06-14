@@ -1,70 +1,77 @@
 package NeuralNetworks.Layer;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Random;
 import Math.*;
-import NeuralNetworks.Neuron.Neuron;
+import NeuralNetworks.Initializer.InitializerFunction;
 
 public class Layer implements Serializable {
 
-    protected Neuron[] neurons;
+    protected double[] values;
+    protected double[][] weights;
     protected int size;
     protected int nextSize;
 
-    public Layer(int size, int nextSize, int seed) {
-        this.size = size;
-        this.nextSize = nextSize;
+    public Layer(int s, LinkedList<Integer> hiddenLayers, int seed, InitializerFunction function) {
+        this.size = hiddenLayers.get(s);
+        this.nextSize = hiddenLayers.get(s + 1);
         Random random = new Random(seed);
-        this.neurons = new Neuron[size];
-        for (int i = 0; i < neurons.length; i++) {
-            double[] weights = new double[nextSize];
-            for (int j = 0; j < weights.length; j++) {
-                weights[j] = 2 * random.nextDouble() - 1;
+        this.weights = new double[size][nextSize];
+        this.values = new double[size];
+        for (int i = 0; i < weights.length; i++) {
+            for (int k = 0; k < weights[i].length; k++) {
+                weights[i][k] = function.calculate(random);
             }
-            neurons[i] = new Neuron(weights);
         }
     }
 
     public Layer(int size) {
         this.size = size;
         this.nextSize = 0;
-        this.neurons = new Neuron[size];
-        for (int i = 0; i < neurons.length; i++) {
-            neurons[i] = new Neuron();
-        }
+        this.values = new double[size];
     }
 
-    public Layer() {
+    public double getWeight(int i, int j) {
+        return weights[i][j];
     }
 
-    public Neuron getNeuron(int i) {
-        return neurons[i];
+    public void addWeight(int i, int j, double weight) {
+        weights[i][j] += weight;
+    }
+
+    public double getValue(int i) {
+        return values[i];
+    }
+
+    public void setValue(int i, double value) {
+        values[i] = value;
     }
 
     public void softmax() {
         double total = 0.0;
         for (int i = 0; i < size(); i++) {
-            total += Math.exp(getNeuron(i).getValue());
+            total += Math.exp(values[i]);
         }
         for (int i = 0; i < size(); i++) {
-            double value = getNeuron(i).getValue();
-            getNeuron(i).setValue(Math.exp(value) / total);
+            double value = values[i];
+            values[i] = Math.exp(value) / total;
         }
     }
 
     public Matrix neuronsToMatrix() {
-        Matrix neurons = new Matrix(1, this.neurons.length + 1);
+        Matrix neurons = new Matrix(1, size + 1);
         neurons.setValue(0, 0, 1.0);
-        for (int i = 0; i < this.neurons.length; i++) {
-            neurons.setValue(0, i + 1, this.neurons[i].getValue());
+        for (int i = 0; i < size; i++) {
+            neurons.setValue(0, i + 1, values[i]);
         }
         return neurons;
     }
 
     public Vector neuronsToVector() {
-        Vector neurons = new Vector(this.neurons.length, 0);
-        for (int i = 0; i < this.neurons.length; i++) {
-            neurons.setValue(i, this.neurons[i].getValue());
+        Vector neurons = new Vector(size, 0);
+        for (int i = 0; i < size; i++) {
+            neurons.setValue(i, values[i]);
         }
         return neurons;
     }
@@ -73,7 +80,7 @@ public class Layer implements Serializable {
         Matrix weights = new Matrix(size, nextSize);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < nextSize; j++) {
-                weights.setValue(i, j, neurons[i].getWeight(j));
+                weights.setValue(i, j, getWeight(i, j));
             }
         }
         return weights;

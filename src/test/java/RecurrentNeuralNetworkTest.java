@@ -1,4 +1,5 @@
 import NeuralNetworks.ActivationFunction.Activation;
+import NeuralNetworks.Initializer.Initializer;
 import NeuralNetworks.InstanceList.VectorizedInstanceList;
 import NeuralNetworks.Net.RecurrentNeuralNetwork;
 import Util.FileUtils;
@@ -26,8 +27,10 @@ public class RecurrentNeuralNetworkTest {
             e.printStackTrace();
         }
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
+        LinkedList<Activation> activations = new LinkedList<>();
         hiddenLayers.add(10);
-        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, Activation.TANH);
+        activations.add(Activation.TANH);
+        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, activations, Initializer.RANDOM);
         net.train(100, 0.2, 0.99, 0.0);
         if (testList != null) {
             double accuracy = net.test(testList);
@@ -48,9 +51,12 @@ public class RecurrentNeuralNetworkTest {
             e.printStackTrace();
         }
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
+        LinkedList<Activation> activations = new LinkedList<>();
         hiddenLayers.add(15);
         hiddenLayers.add(15);
-        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, Activation.SIGMOID);
+        activations.add(Activation.TANH);
+        activations.add(Activation.TANH);
+        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, activations, Initializer.RANDOM);
         net.train(100, 0.01, 0.99, 0.5);
         if (testList != null) {
             double accuracy = net.test(testList);
@@ -71,9 +77,12 @@ public class RecurrentNeuralNetworkTest {
             e.printStackTrace();
         }
         LinkedList<Integer> hiddenLayers = new LinkedList<>();
+        LinkedList<Activation> activations = new LinkedList<>();
         hiddenLayers.add(30);
         hiddenLayers.add(20);
-        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, Activation.TANH);
+        activations.add(Activation.TANH);
+        activations.add(Activation.TANH);
+        RecurrentNeuralNetwork net = new RecurrentNeuralNetwork(1, hiddenLayers, trainList, activations, Initializer.RANDOM);
         net.train(100, 0.01, 0.99, 0.5);
         if (testList != null) {
             double accuracy = net.test(testList);

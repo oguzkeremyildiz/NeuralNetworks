@@ -1,51 +1,55 @@
 package NeuralNetworks.Layer;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 import Math.*;
-import NeuralNetworks.Neuron.Neuron;
-import NeuralNetworks.Neuron.RecurrentNeuron;
+import NeuralNetworks.Initializer.InitializerFunction;
 
 public class RecurrentLayer extends Layer implements Serializable {
 
-    public RecurrentLayer() {
+    protected double[][] recurrentWeights;
+    private final double[] oldValues;
+
+    public RecurrentLayer(int s, LinkedList<Integer> hiddenLayers, int seed, InitializerFunction function) {
+        super(s, hiddenLayers, seed, function);
+        Random random = new Random(seed);
+        this.oldValues = new double[size];
+        this.recurrentWeights = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int k = 0; k < size; k++) {
+                recurrentWeights[i][k] = function.calculate(random);
+            }
+        }
     }
 
-    public RecurrentLayer(int size, int nextSize, int seed) {
-        super();
-        this.size = size;
-        this.nextSize = nextSize;
-        Random random = new Random(seed);
-        this.neurons = new Neuron[size];
-        for (int i = 0; i < neurons.length; i++) {
-            double[] weights = new double[nextSize];
-            double[] recurrentWeights = new double[size];
-            for (int j = 0; j < weights.length; j++) {
-                weights[j] = 2 * random.nextDouble() - 1;
-            }
-            for (int j = 0; j < recurrentWeights.length; j++) {
-                recurrentWeights[j] = 2 * random.nextDouble() - 1;
-            }
-            neurons[i] = new RecurrentNeuron(weights, recurrentWeights);
-        }
+    public double getRecurrentWeight(int neuronIndex, int weightIndex) {
+        return recurrentWeights[neuronIndex][weightIndex];
+    }
+
+    public void addRecurrentWeight(int neuronIndex, int weightIndex, double weight) {
+        recurrentWeights[neuronIndex][weightIndex] += weight;
+    }
+
+    public double getOldValue(int i) {
+        return oldValues[i];
     }
 
     public void setValuesToZero() {
-        for (Neuron neuron : neurons) {
-            ((RecurrentNeuron) neuron).setOldValue(0);
-        }
+        Arrays.fill(oldValues, 0.0);
     }
 
     public void setValues() {
-        for (Neuron neuron : neurons) {
-            ((RecurrentNeuron) neuron).setOldValue();
+        for (int i = 0; i < oldValues.length; i++) {
+            oldValues[i] = values[i];
         }
     }
 
     public Matrix oldNeuronsToMatrix() {
-        Matrix neurons = new Matrix(1, this.neurons.length);
-        for (int i = 0; i < this.neurons.length; i++) {
-            neurons.setValue(0, i, ((RecurrentNeuron)this.neurons[i]).getOldValue());
+        Matrix neurons = new Matrix(1, size);
+        for (int i = 0; i < size; i++) {
+            neurons.setValue(0, i, oldValues[i]);
         }
         return neurons;
     }
